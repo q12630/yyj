@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大观园试才题对额 · 卷轴</title>
+<style>
+*{
+  box-sizing:border-box;margin:0;padding:0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+html,body{height:100%}
+.rpg-scene, .rpg-scene *{
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.rpg-scene button,
+.rpg-scene .rpg-dialog{
+  outline: none;
+}
+  body{
+    background:radial-gradient(ellipse at 50% 35%, #1a1710 0%, #0d0b08 60%, #060504 100%);
+    font-family:"Songti SC","STSong","SimSun","Noto Serif SC",serif;
+    color:#e8dcc0;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;
+    background-image:radial-gradient(rgba(200,170,100,.05) 1px, transparent 1px);
+    background-size:3px 3px;opacity:.5;
+  }
+  .app{
+    position:relative;width:100%;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;padding:16px;
+  }
+
+  .titlebar{
+    display:flex;align-items:center;gap:14px;
+    opacity:0;transform:translateY(-8px);
+    transition:opacity 1s ease .5s, transform 1s ease .5s;
+  }
+  body.ready .titlebar{opacity:1;transform:translateY(0)}
+  .titlebar .cn{
+    font-size:clamp(16px,2.1vw,24px);letter-spacing:.36em;
+    color:#e3cf9c;text-shadow:0 0 18px rgba(200,160,70,.35);
+    padding-left:.36em;
+  }
+  .titlebar .seal{
+    width:26px;height:26px;border:1px solid #9b3a30;border-radius:3px;
+    color:#c25a4a;font-size:11px;display:flex;align-items:center;justify-content:center;
+    line-height:1.1;box-shadow:0 0 10px rgba(180,60,40,.25) inset;
+  }
+  .titlebar .sub{font-size:11px;color:#7d7b6c;letter-spacing:.22em}
+
+  .scroll{
+    position:relative;
+    width:min(94vw, 1240px, calc(72vh * 1.7778));
+    aspect-ratio:16/9;
+    filter:drop-shadow(0 24px 60px rgba(0,0,0,.9));
+  }
+  .paper{
+    position:absolute;inset:0;overflow:hidden;
+    clip-path:inset(0 50% 0 50%);
+    background:#c9d8e0;border-radius:2px;
+  }
+  .paper::after{
+    content:'';position:absolute;inset:0;pointer-events:none;z-index:2;
+    background:
+      radial-gradient(ellipse 62% 52% at 72% 20%, rgba(255,238,190,.18), transparent 72%),
+      radial-gradient(ellipse at 50% 52%, transparent 52%, rgba(45,32,14,.50) 100%);
+    box-shadow:inset 0 0 70px rgba(30,20,5,.55);
+  }
+  .paper::before{
+    content:'';position:absolute;inset:0;pointer-events:none;z-index:3;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(120,90,50,.045) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(120,90,50,.032) 0 1px, transparent 1px 4px);
+    mix-blend-mode:multiply;
+  }
+  canvas{
+    display:block;width:100%;height:100%;
+    image-rendering:pixelated;image-rendering:crisp-edges;
+  }
+  .rod{
+    position:absolute;top:50%;width:15px;height:108%;
+    transform:translate(-50%,-50%);border-radius:8px;
+    background:linear-gradient(90deg,#20140c 0%,#5a3d22 22%,#8a6338 46%,#a87d47 54%,#4a3220 78%,#1c1109 100%);
+    box-shadow:0 0 22px rgba(0,0,0,.9), inset 0 0 8px rgba(0,0,0,.7);
+    z-index:6;
+  }
+  .rod::before,.rod::after{
+    content:'';position:absolute;left:50%;transform:translateX(-50%);
+    width:23px;height:11px;border-radius:4px;
+    background:linear-gradient(90deg,#6d5222,#d9b45c 40%,#f0d894 50%,#a8843c 70%,#5a431c);
+    box-shadow:0 0 10px rgba(220,180,90,.35);
+  }
+  .rod::before{top:-7px}
+  .rod::after{bottom:-7px}
+  #rodL{left:50%}
+  #rodR{left:50%}
+
+  .placard { position:absolute; left:50%; top:21%; z-index:11; pointer-events:none; opacity:0; transform:translate(-50%,-50%); will-change:transform,opacity; }
+  .placard.show{animation:placardIn .24s steps(5,end) forwards;}
+  .placard.clickable.show{pointer-events:auto; cursor:pointer;}
+  @keyframes placardIn{ 0% {opacity:0;transform:translate(-50%,-50%) scale(.55,1.55);} 40% {opacity:1;transform:translate(-50%,-50%) scale(1.10,1);} 72% {opacity:1;transform:translate(-50%,-50%) scale(.96,1);} 100%{opacity:1;transform:translate(-50%,-50%) scale(1,1);} }
+  .placard.hide{animation:placardOut .16s steps(3,end) forwards; pointer-events:none;}
+  @keyframes placardOut{ 0% {opacity:1;transform:translate(-50%,-50%) scale(1,1);} 100% {opacity:0;transform:translate(-50%,-50%) scale(.62,1.45);} }
+  .placard-inner{ position:relative; display:flex; align-items:center; gap:11px; padding:8px 20px 8px 10px; background:#17130c; border:2px solid #d9b45c; box-shadow: 0 0 0 2px #060504, 0 0 0 4px #7a5c22, 6px 6px 0 rgba(0,0,0,.55), inset 0 0 0 1px rgba(240,215,150,.12); }
+  .placard-inner::before{ content:''; position:absolute; inset:-2px; pointer-events:none; background: linear-gradient(#efd27a,#efd27a) 0 0/4px 4px no-repeat, linear-gradient(#efd27a,#efd27a) 100% 0/4px 4px no-repeat, linear-gradient(#efd27a,#efd27a) 0 100%/4px 4px no-repeat, linear-gradient(#efd27a,#efd27a) 100% 100%/4px 4px no-repeat; opacity:.75; }
+  .placard-no{ flex:none; width:22px; height:22px; display:flex; align-items:center; justify-content:center; background:#b8402f; border:2px solid #d9a86a; box-shadow:0 0 0 2px #060504; color:#fbeecb; font-size:12px; line-height:1; }
+  .placard-name{ font-size:clamp(15px,2.1vw,25px); letter-spacing:.26em; color:#f6e6b8; text-shadow:2px 2px 0 #000, 0 0 16px rgba(217,180,92,.45); white-space:nowrap; padding-left:.26em; }
+  .placard-name::before,.placard-name::after{ content:''; display:inline-block; width:5px; height:5px; background:#d9b45c; transform:rotate(45deg); vertical-align:middle; margin:0 11px 4px; box-shadow:0 0 7px rgba(217,180,92,.85); }
+
+  .dialog{ position:absolute; left:2.2%; top:3.4%; width:min(42%, 440px); z-index:9; pointer-events:none; opacity:0; filter:drop-shadow(0 10px 22px rgba(0,0,0,.7)); }
+  .dialog.show{animation:dlgIn .22s steps(5,end) both;}
+  @keyframes dlgIn{ 0%{opacity:0;transform:translate(-14px,-10px) scale(.90);} 60%{opacity:1;transform:translate(2px,1px) scale(1.012);} 100%{opacity:1;transform:translate(0,0) scale(1);} }
+  .dialog.hide{animation:dlgOut .16s steps(3,end) both;}
+  @keyframes dlgOut{ 0%{opacity:1;transform:translate(0,0) scale(1);} 100%{opacity:0;transform:translate(-10px,-6px) scale(.94);} }
+  .dlg-inner{ position:relative; background:#14110b; border:2px solid #c9a54a; box-shadow: 0 0 0 2px #060504, 0 0 0 4px #6e5322, inset 0 0 0 1px rgba(240,215,150,.14), inset 0 0 30px rgba(0,0,0,.85); padding:0 11px 10px; overflow:hidden; }
+  .dlg-inner::before{ content:''; position:absolute; inset:-2px; pointer-events:none; background: linear-gradient(#efd27a,#efd27a) 0 0/4px 4px no-repeat, linear-gradient(#efd27a,#efd27a) 100% 0/4px 4px no-repeat, linear-gradient(#efd27a,#efd27a) 0 100%/4px 4px no-repeat, linear-gradient(#efd27a,#efd27a) 100% 100%/4px 4px no-repeat; opacity:.55; }
+  .dlg-bar{ display:flex; align-items:center; justify-content:space-between; margin:0 -11px 7px; padding:2px 11px; background:#7a241c; border-bottom:2px solid #060504; box-shadow:inset 0 -1px 0 rgba(240,215,150,.30); }
+  .dlg-bar-t{ font-size:9px; letter-spacing:.30em; color:#f6e8c4; text-shadow:1px 1px 0 rgba(0,0,0,.7); }
+  .dlg-step{ font-size:8.5px; letter-spacing:.12em; color:#e8cf9a; opacity:.9; text-shadow:1px 1px 0 rgba(0,0,0,.7); }
+  .dlg-head{ display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+  .dlg-no{ flex:none; width:16px; height:16px; display:flex; align-items:center; justify-content:center; background:#b8402f; border:1px solid #d9a86a; color:#fbeecb; font-size:9.5px; line-height:1; }
+  .dlg-name{ font-size:clamp(10.5px,1.15vw,13px); letter-spacing:.10em; color:#f4e2b0; text-shadow:1px 1px 0 rgba(0,0,0,.8); }
+  .dlg-plaque{ font-size:clamp(9px,.98vw,11px); color:#d0aa55; letter-spacing:.04em; line-height:1.65; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed rgba(200,165,90,.26); }
+  .dlg-text{ font-size:clamp(9px,.85vw,10.5px); line-height:1.72; color:#a6a698; letter-spacing:.02em; min-height:4.6em; text-align:justify; }
+  .dlg-foot{ display:flex; align-items:center; gap:6px; margin-top:7px; height:auto; min-height:14px; }
+  .dlg-tri{ font-size:7px; color:#d9b45c; animation:triBlink .9s steps(1) infinite; }
+  @keyframes triBlink{0%,49%{opacity:1}50%,100%{opacity:.12}}
+  .dlg-hint{ font-size:8.5px; letter-spacing:.14em; color:#6f7064; }
+  .dlg-progress{ position:absolute; left:0; right:0; bottom:0; height:3px; background:rgba(200,165,90,.10); }
+  .dlg-progress i{ display:block; height:100%; width:0; background:repeating-linear-gradient(90deg, #e8c95a 0 4px, rgba(0,0,0,0) 4px 6px); box-shadow:0 0 6px rgba(232,201,90,.5); }
+  .dialog.enterable{ pointer-events:auto; }
+  .dlg-enter{ margin-left:auto; font-family:inherit; font-size:8.5px; letter-spacing:.14em; color:#f6e6b8; background:#7a241c; border:1px solid #d9a86a; padding:2px 7px; cursor:pointer; box-shadow:0 0 0 1px #060504, 1px 1px 0 rgba(0,0,0,.6); animation:enterPulse 1.6s ease-in-out infinite; }
+  @keyframes enterPulse{ 0%,100%{ box-shadow:0 0 0 1px #060504, 1px 1px 0 rgba(0,0,0,.6), 0 0 0 rgba(217,180,92,0); } 50% { box-shadow:0 0 0 1px #060504, 1px 1px 0 rgba(0,0,0,.6), 0 0 10px rgba(217,180,92,.8); } }
+  .dlg-enter:hover{ background:#9a3024; color:#fff6d8; }
+
+  .bar{ display:flex; align-items:center; gap:14px; opacity:0; transform:translateY(8px); transition:opacity 1s ease .8s, transform 1s ease .8s; }
+  body.ready .bar{opacity:1;transform:translateY(0)}
+  .btn{ background:#14110b; color:#c6b183; border:2px solid #6e5322; box-shadow:0 0 0 2px #060504, 2px 2px 0 rgba(0,0,0,.6); padding:5px 14px; font-family:inherit; font-size:11.5px; letter-spacing:.2em; cursor:pointer; border-radius:0; transition:color .15s, border-color .15s, background .15s, transform .08s steps(2,end), box-shadow .08s steps(2,end); }
+  .btn:hover{ color:#f0dfae; border-color:#c9a54a; background:#1e180f; transform:translate(-1px,-1px); box-shadow:0 0 0 2px #060504, 3px 3px 0 rgba(0,0,0,.6); }
+  .btn:active{ transform:translate(1px,1px); box-shadow:0 0 0 2px #060504, 1px 1px 0 rgba(0,0,0,.6); }
+  .dots{display:flex;gap:6px}
+  .dot{ width:8px; height:8px; border-radius:0; background:#2a2416; border:1px solid #6e5322; cursor:pointer; transition:background .15s, border-color .15s, box-shadow .15s; padding:0; }
+  .dot.on{ background:#e8c95a; border-color:#f6e6b8; box-shadow:0 0 8px rgba(232,201,90,.85); }
+
+  /* ========== 复古 RPG 界面 ========== */
+  .rpg-scene {
+  position: fixed; inset: 0; z-index: 999;
+  background: #000;
+  display: flex;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+  font-family: "Songti SC","STSong","SimSun","Noto Serif SC",serif;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .5s ease, visibility .5s;
+  }
+  .rpg-scene.show {
+  opacity: 1;
+  visibility: visible;
+  }
+  .rpg-bg {
+    position: absolute; inset: 0;
+    background-color: #111;
+    background-size: cover; background-position: center;
+    image-rendering: pixelated;
+    filter: brightness(0.85) contrast(1.1);
+  }
+
+  .rpg-chars {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 2;
+  }
+  .rpg-char {
+    position: absolute; bottom: 0;
+    height: clamp(300px, 58vh, 680px);
+    object-fit: contain;
+    image-rendering: pixelated;
+    transition: transform .35s ease, opacity .35s ease, filter .35s ease;
+    opacity: 0; transform: translateY(24px);
+  }
+  .rpg-char.left  { left: 5%; }
+  .rpg-char.right { right: 5%; }
+  .rpg-char.active {
+    opacity: 1; transform: translateY(0);
+    filter: brightness(.62) saturate(.75);
+  }
+  .rpg-char.speaking {
+    transform: translateY(-10px) scale(1.03);
+    filter: brightness(1.15) saturate(1) drop-shadow(0 0 24px rgba(255,220,150,.5));
+    z-index: 3;
+  }
+
+  .rpg-dialog {
+    position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);
+    width: 85%; max-width: 900px; min-height: 180px;
+    background: rgba(10, 10, 10, 0.92);
+    border: 4px solid #c9a54a;
+    border-radius: 4px;
+    padding: 20px 30px;
+    box-shadow: 0 0 0 4px #060504, inset 0 0 20px rgba(0,0,0,0.8);
+    color: #fff; z-index: 3; cursor: pointer;
+  }
+  .rpg-name {
+    position: absolute; top: -20px; left: 20px;
+    background: #7a241c; color: #f6e6b8;
+    padding: 4px 20px; font-size: 20px; font-weight: bold;
+    border: 2px solid #d9a86a; border-radius: 2px;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+    letter-spacing: .12em;
+  }
+  .rpg-text {
+    font-size: 20px; line-height: 1.7;
+    letter-spacing: 1px; margin-top: 10px; color: #e8dcc0;
+    text-shadow: 1px 1px 2px #000;
+    min-height: 1.7em;
+  }
+  .rpg-next {
+    position: absolute; bottom: 15px; right: 20px;
+    font-size: 16px; color: #c9a54a;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .rpg-exit {
+    position: absolute; top: 20px; right: 20px; z-index: 10;
+    background: #7a241c; color: #f6e6b8; border: 2px solid #d9a86a;
+    padding: 8px 16px; cursor: pointer;
+    font-family: inherit; font-weight: bold;
+    letter-spacing: .1em;
+  }
+  .rpg-exit:hover { background: #9a3024; }
+
+  .rpg-choices {
+    position: absolute; left: 50%; top: 40%;
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    display: none;
+    flex-direction: column; gap: 12px;
+    width: min(74%, 700px);
+  }
+  .rpg-choices.show { display: flex; }
+  .rpg-choice {
+    background: rgba(10,10,10,.94);
+    border: 3px solid #c9a54a;
+    border-radius: 3px;
+    color: #e8dcc0;
+    font-family: inherit;
+    font-size: clamp(14px, 1.8vw, 19px);
+    line-height: 1.5;
+    padding: 12px 20px;
+    cursor: pointer;
+    text-align: left;
+    letter-spacing: .04em;
+    box-shadow: 0 0 0 2px #060504, 4px 4px 0 rgba(0,0,0,.6);
+    transition: background .12s, color .12s, transform .1s, box-shadow .1s;
+    animation: choiceIn .22s steps(4, end) both;
+  }
+  .rpg-choice:hover {
+    background: #7a241c;
+    color: #fff6d8;
+    transform: translate(-2px, -2px);
+    box-shadow: 0 0 0 2px #060504, 6px 6px 0 rgba(0,0,0,.6), 0 0 20px rgba(217,180,92,.4);
+  }
+  @keyframes choiceIn {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .rpg-actions {
+    position: absolute; bottom: 22px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: none; gap: 16px;
+  }
+  .rpg-btn {
+    background: #7a241c; color: #f6e6b8;
+    border: 2px solid #d9a86a;
+    padding: 10px 26px; cursor: pointer;
+    font-family: inherit; font-size: 16px;
+    letter-spacing: .16em;
+    box-shadow: 0 0 0 2px #060504, 3px 3px 0 rgba(0,0,0,.6);
+  }
+  .rpg-btn:hover { background: #9a3024; color: #fff6d8; }
+
+  /* 人物登场卡 */
+  .intro-card {
+    position: absolute; inset: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    opacity: 0; visibility: hidden;
+    transition: opacity .35s ease, visibility .35s;
+  }
+  .intro-card.show { opacity: 1; visibility: visible; }
+  .intro-card-inner {
+    display: flex; align-items: center; gap: 20px;
+    background: rgba(10,10,10,.94);
+    border: 3px solid #c9a54a;
+    border-radius: 4px;
+    padding: 18px 28px;
+    box-shadow: 0 0 0 3px #060504, 0 0 40px rgba(217,180,92,.35);
+    transform: scale(.85) translateY(10px);
+    transition: transform .35s cubic-bezier(.2,1.4,.5,1);
+  }
+  .intro-card.show .intro-card-inner {
+    transform: scale(1) translateY(0);
+  }
+  .intro-card-img {
+    width: 96px; height: 96px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    background: #1a150e;
+    border: 2px solid #d9a86a;
+  }
+  .intro-card-txt { display: flex; flex-direction: column; gap: 6px; }
+  .intro-card-name {
+    font-size: 26px; color: #f6e6b8; letter-spacing: .2em;
+    text-shadow: 2px 2px 0 #000;
+  }
+  .intro-card-role {
+    font-size: 14px; color: #c9a54a; letter-spacing: .12em;
+  }
+  .intro-card-desc {
+    font-size: 15px; color: #c8c4b4; letter-spacing: .04em;
+    max-width: 320px; line-height: 1.6;
+  }
+  .intro-card-hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #c9a54a;
+    letter-spacing: .16em;
+    animation: blink 1.2s step-end infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="titlebar">
+    <div class="seal">石头<br>记</div>
+    <div>
+      <div class="cn">大观园试才题对额</div>
+      <div class="sub">红楼梦 · 第十七回 · 游览路线图</div>
+    </div>
+  </div>
+
+  <div class="scroll" id="scroll">
+    <div class="paper" id="paper"><canvas id="cv"></canvas></div>
+    <div class="rod" id="rodL"></div>
+    <div class="rod" id="rodR"></div>
+
+    <div class="placard" id="placard">
+      <div class="placard-inner">
+        <span class="placard-no" id="pno">壹</span>
+        <span class="placard-name" id="pname"></span>
+      </div>
+    </div>
+
+    <div class="dialog" id="dialog">
+      <div class="dlg-inner">
+        <div class="dlg-bar">
+          <span class="dlg-bar-t">游　览　志</span>
+          <span class="dlg-step" id="cstep">一 / 九</span>
+        </div>
+        <div class="dlg-head">
+          <span class="dlg-no" id="cno">壹</span>
+          <span class="dlg-name" id="cname"></span>
+        </div>
+        <div class="dlg-plaque" id="cplaque"></div>
+        <div class="dlg-text" id="ctext"></div>
+        <div class="dlg-foot">
+          <span class="dlg-tri">▼</span>
+          <span class="dlg-hint" id="chint">自动游览中</span>
+          <button class="dlg-enter" id="enterBtn">进 入 此 景 ▶</button>
+        </div>
+        <div class="dlg-progress"><i id="cprog"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="btn" id="prev">‹ 前一景</button>
+    <button class="btn" id="play">暂停</button>
+    <button class="btn" id="next">后一景 ›</button>
+    <div class="dots" id="dots"></div>
+  </div>
+</div>
+
+<!-- ========== 复古 RPG 界面层 ========== -->
+<div class="rpg-scene" id="rpgScene">
+  <div class="rpg-bg" id="rpgBg"></div>
+
+  <div class="intro-card" id="introCard">
+    <div class="intro-card-inner">
+      <img class="intro-card-img" id="icImg" alt="">
+      <div class="intro-card-txt">
+        <div class="intro-card-name" id="icName"></div>
+        <div class="intro-card-role" id="icRole"></div>
+        <div class="intro-card-desc" id="icDesc"></div>
+        <div class="intro-card-hint">▼ 点击继续</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rpg-chars">
+    <img id="charL" class="rpg-char left"  alt="">
+    <img id="charR" class="rpg-char right" alt="">
+  </div>
+
+  <div class="rpg-choices" id="rpgChoices"></div>
+
+  <div class="rpg-dialog" id="rpgDialog">
+    <div class="rpg-name" id="rpgName">旁白</div>
+    <div class="rpg-text" id="rpgText"></div>
+    <div class="rpg-next" id="rpgNext">▼ 点击继续</div>
+  </div>
+
+  <div class="rpg-actions" id="rpgActions">
+    <button class="rpg-btn" id="retryBtn">重　试</button>
+    <button class="rpg-btn" id="backBtn">返 回 卷 轴</button>
+  </div>
+
+  <button class="rpg-exit" id="exitRpg">返回卷轴</button>
+</div>
+
+<script>
+/* ========== 卷轴及 Canvas 代码 ========== */
+const W = 480, H = 270, GY = 200;
+const WORLD_W = 3200;
+const cv  = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+cv.width = W; cv.height = H;
+ctx.imageSmoothingEnabled = false;
+
+function R(x,y,w,h,c){ x=Math.round(x); y=Math.round(y); w=Math.round(w); h=Math.round(h); if(w<=0||h<=0) return; ctx.fillStyle = c; ctx.fillRect(x,y,w,h); }
+function disc(cx,cy,r,color){ if(r<=0) return; ctx.fillStyle = color; cx=Math.round(cx); cy=Math.round(cy); r=Math.round(r); for(let y=-r;y<=r;y++){ const w = Math.floor(Math.sqrt(Math.max(0, r*r - y*y))); ctx.fillRect(cx-w, cy+y, w*2+1, 1); } }
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+function rnd(n){ const x=Math.sin(n*127.1+311.7)*43758.5453; return x-Math.floor(x); }
+
+const C = { skyTop:'#5f9ccb', sky1:'#7cb2d8', sky2:'#9dc8e4', sky3:'#c0dced', sky4:'#dceaf1', skyHor:'#f2f0e2', hill1:'#9dbccc', hill2:'#7ba1b8', hill3:'#5c859e', midTree:'#7fa88c', midTree2:'#6d987c', grass:'#6d9c4a', grassD:'#537a35', grassL:'#8bb85e', path:'#c0ac86', pathD:'#a48f6c', roof:'#4a5568', roofD:'#2f3846', roofL:'#6b7a8e', roofG:'#3c4a54', roofGL:'#5d7078', wall:'#e8e2d0', wallD:'#cdc5b0', wallP:'#f0dcd4', brick:'#c2c4bc', brickD:'#a4a69e', pillar:'#9c3d33', pillarL:'#b8514a', gold:'#d4a843', goldL:'#efd27a', stone:'#b8b8ac', stoneD:'#8e8e82', stoneL:'#d2d2c6', jade:'#5e8a5a', jadeL:'#7fb078', jadeD:'#3f6340', bamboo:'#4e7d44', bambooL:'#6fa35c', bambooD:'#2f5230', peach:'#e89aac', peachL:'#f7c4d0', water:'#7fb8cc', waterD:'#5a95ad', waterL:'#c8ecf6', clay:'#c2a470', clayD:'#9c8250', thatch:'#c9ab6a', thatchD:'#a4884a' };
+
+const clouds = []; for(let i=0;i<9;i++){ clouds.push({ x: rnd(i*3.1)*W*2.2, y: 18 + rnd(i*7.7)*95, s: 0.7 + rnd(i*11.3)*1.0, a: 0.45 + rnd(i*5.3)*0.35, sp: 0.05 + rnd(i*13.7)*0.07 }); }
+const birds = []; for(let i=0;i<5;i++){ birds.push({ x: rnd(i*4.3)*W*1.5, y: 26 + rnd(i*9.1)*54, sp: 0.13 + rnd(i*6.7)*0.12, ph: rnd(i*3.3)*6.28, s: 0.8 + rnd(i*8.9)*0.7 }); }
+const flakes = []; for(let i=0;i<54;i++){ flakes.push({ x: Math.random()*W, y: Math.random()*H, vy: 0.10 + Math.random()*0.22, ph: Math.random()*6.28, sp: 0.012 + Math.random()*0.026, sw: 4 + Math.random()*8, sz: Math.random()<0.28 ? 2 : 1 }); }
+
+function drawSky(){ const bands = [ [0,26,C.skyTop],[26,56,C.sky1],[56,88,C.sky2],[88,118,C.sky3],[118,148,C.sky4],[148,178,C.skyHor],[178,200,'#f5f2e2'] ]; for(const [y0,y1,c] of bands) R(0,y0,W,y1-y0,c); }
+function drawSun(){ let sx = 372 - camX*0.045; sx = ((sx % (W*2)) + W*2) % (W*2); if(sx > W+120) return; ctx.globalAlpha = 0.055; disc(sx, 44, 44, '#fff6d0'); ctx.globalAlpha = 0.10; disc(sx, 44, 30, '#fff6d0'); ctx.globalAlpha = 0.18; disc(sx, 44, 19, '#fffbe6'); ctx.globalAlpha = 1; disc(sx, 44, 13, '#fffdf0'); disc(sx-4, 40, 8, '#ffffff'); }
+function drawClouds(t){ for(const c of clouds){ let x = c.x + t*0.002*c.sp - camX*0.06; x = ((x % (W*2.2)) + W*2.2) % (W*2.2); if(x > W+90 || x < -90) continue; const s = c.s; ctx.globalAlpha = c.a; disc(x, c.y, 7*s, '#ffffff'); disc(x+10*s, c.y-4*s, 8*s, '#ffffff'); disc(x+21*s, c.y-1*s, 6*s, '#ffffff'); disc(x+30*s, c.y+1*s, 4.5*s, '#ffffff'); R(x-6*s, c.y+1*s, 40*s, 5*s, '#ffffff'); ctx.globalAlpha = c.a*0.55; R(x-6*s, c.y+5*s, 40*s, 2*s, '#dfeaf2'); ctx.globalAlpha = 1; } }
+function drawBirds(t){ for(const b of birds){ let x = b.x + t*0.001*b.sp*60 - camX*0.12; x = ((x % (W*1.5)) + W*1.5) % (W*1.5); if(x > W+20 || x < -20) continue; const flap = Math.sin(t*0.006 + b.ph) > 0 ? 1 : 0; const s = b.s; const y = b.y; ctx.fillStyle = 'rgba(58,74,92,.75)'; ctx.fillRect(Math.round(x-4*s), Math.round(y+flap), Math.round(4*s), 1); ctx.fillRect(Math.round(x+1), Math.round(y+flap), Math.round(4*s), 1); ctx.fillRect(Math.round(x-1), Math.round(y-1), 2, 1); if(flap){ ctx.fillRect(Math.round(x-5*s), Math.round(y-1), Math.round(2*s), 1); ctx.fillRect(Math.round(x+3*s), Math.round(y-1), Math.round(2*s), 1); } } }
+function ridge(off, baseY, color, amp, f1, f2, f3){ ctx.fillStyle = color; for(let x=0;x<W;x++){ const wx = x + off; const y = baseY - (Math.sin(wx*f1)*amp + Math.sin(wx*f2+1.3)*amp*0.6 + Math.sin(wx*f3+2.1)*amp*0.9); const yy = Math.round(y); const hh = H - yy; if(hh>0) ctx.fillRect(x, yy, 1, hh); } }
+function drawHorizonMist(){ ctx.globalAlpha = 0.55; R(0, 168, W, 22, '#eef2ec'); ctx.globalAlpha = 0.30; R(0, 182, W, 16, '#f4f4e8'); ctx.globalAlpha = 1; }
+function drawMidTrees(){ for(let i=0;i<70;i++){ const wx = i*52 + (i*37)%43; if(wx < camX - 70 || wx > camX + W + 70) continue; const h = 22 + ((i*37)%18); const w = 12 + ((i*23)%8); R(wx, GY-h, 2, h, '#7d9c86'); disc(wx+1, GY-h, w*0.55, C.midTree); disc(wx-4, GY-h+6, w*0.42, C.midTree2); disc(wx+6, GY-h+5, w*0.40, C.midTree2); disc(wx+1, GY-h-4, w*0.40, '#8db49a'); } }
+
+function drawGround(x0,x1){ R(x0, GY, x1-x0, H-GY, C.grass); R(x0, GY, x1-x0, 3, C.grassL); R(x0, GY+3, x1-x0, 2, '#7aab52'); for(let x=x0;x<x1;x+=3){ if(rnd(x*0.37) > 0.58){ const yy = GY + 8 + Math.floor(rnd(x*1.13)*66); R(x, yy, 1, 2, C.grassD); } } for(let x=x0;x<x1;x+=7){ const h = rnd(x*0.71); if(h > 0.55){ const gh = 2 + Math.floor(h*3); R(x, GY-gh, 1, gh, C.grassD); if(h>0.85) R(x+1, GY-gh+1, 1, 1, '#9cc46a'); } } }
+function drawPath(x0,x1){ for(let x=x0;x<x1;x++){ const yy = 238 + Math.round(Math.sin(x*0.011)*6 + Math.sin(x*0.029)*2.5); R(x, yy, 1, 22, C.path); R(x, yy, 1, 2, '#d3c1a0'); R(x, yy+20, 1, 2, C.pathD); } for(let x=x0;x<x1;x+=16){ const yy = 240 + Math.round(Math.sin(x*0.011)*6 + Math.sin(x*0.029)*2.5); ctx.globalAlpha = 0.5; R(x, yy+3, 7, 1, '#e8cf8a'); ctx.globalAlpha = 1; } }
+
+function roof(cx, baseY, w, h, main, dark, light, ridgeCol){ cx=Math.round(cx); baseY=Math.round(baseY); w=Math.round(w); h=Math.round(h); if(h<3) h=3; for(let i=0;i<h;i++){ const p = h>1 ? i/(h-1) : 1; const ww = Math.round(w*(0.99 - 0.50*Math.pow(p,0.70))); const y = baseY - h + i; R(cx-ww/2, y, ww, 1, main); if(i%2===1){ for(let x=cx-ww/2+2; x<cx+ww/2-1; x+=3) R(x, y, 1, 1, dark); } } const tw = Math.round(w*0.44); R(cx-tw/2, baseY-h, tw, 2, ridgeCol||dark); R(cx-tw/2, baseY-h-1, tw, 1, light); const half = Math.round(w/2); R(cx-half-2, baseY-4, 4, 2, main); R(cx-half-4, baseY-6, 3, 3, main); R(cx-half-5, baseY-8, 2, 3, ridgeCol||dark); R(cx+half-2, baseY-4, 4, 2, main); R(cx+half+1, baseY-6, 3, 3, main); R(cx+half+3, baseY-8, 2, 3, ridgeCol||dark); R(cx-half, baseY-1, w, 1, light); }
+function roofRound(cx, baseY, w, h, main, dark, light){ cx=Math.round(cx); baseY=Math.round(baseY); w=Math.round(w); h=Math.round(h); for(let i=0;i<h;i++){ const p = h>1 ? i/(h-1) : 1; const ww = Math.round(w*(0.96 - 0.44*Math.pow(p,1.4))); const y = baseY - h + i; R(cx-ww/2, y, ww, 1, main); if(i%2===1) for(let x=cx-ww/2+2;x<cx+ww/2-1;x+=3) R(x,y,1,1,dark); } R(cx-Math.round(w*0.44), baseY-h, Math.round(w*0.88), 1, light); }
+function rockMass(cx, gy, w, h, seed){ let s = seed*3571 + 17; const rr = ()=>{ s=(s*9301+49297)%233280; return s/233280; }; const n = 10; for(let i=0;i<n;i++){ const bw = w*(0.26 + rr()*0.46); const bh = h*(0.24 + rr()*0.52); const bx = cx - w/2 + rr()*(w-bw); const by = gy - bh - rr()*h*0.36; const c = rr()>0.5 ? C.stone : C.stoneD; R(bx, by, bw, bh, c); R(bx, by, bw, 2, C.stoneL); R(bx, by, 1, bh, C.stoneL); R(bx+bw-1, by, 1, bh, '#767670'); if(rr()>0.35){ const mx = bx + rr()*(bw*0.55); R(mx, by+2, Math.max(2,bw*0.30), 2, C.jade); if(rr()>0.5) R(mx+1, by+4, 2, 1, C.jadeL); } } }
+function willow(x, gy, h, t){ R(x, gy-h, 2, h, '#6a5a3e'); R(x, gy-h, 1, h, '#87724e'); const sway = Math.sin(t*0.0018 + x*0.05)*1.4; for(let i=0;i<7;i++){ const bx = x-13 + i*4.2; const len = 14 + ((i*7)%16); for(let k=0;k<len;k++){ const off = Math.sin(t*0.0016 + k*0.22 + i)*1.1*sway; R(bx + off + k*0.10, gy-h + 5 + k, 1, 1, k<4 ? C.jadeL : C.bamboo); } } }
+function bambooClump(x, gy, hBase, n, t){ for(let i=0;i<n;i++){ const bx = x + (i - n/2)*4 + ((i*13)%3); const bh = hBase + ((i*29)%22); const sway = Math.sin(t*0.0012 + bx*0.06)*1.2; const tx = bx + sway*0.5; for(let y=0;y<bh;y++){ const px = bx + sway*(y/bh)*0.9; R(px, gy-y, 2, 1, y%8===0 ? C.bambooD : C.bamboo); if(y%8===0) R(px, gy-y, 3, 1, C.bambooD); } for(let k=0;k<3;k++){ const ly = gy - bh + 6 + k*7; R(tx-5+sway, ly, 5, 1, C.bambooL); R(tx+2, ly+2, 5, 1, C.bambooL); } } }
+function blossom(x, gy, r, hh, c1, c2, c3){ R(x-2, gy-hh*0.58, 4, hh*0.58, '#6b5236'); R(x-8, gy-hh*0.58, 7, 2, '#6b5236'); R(x+1, gy-hh*0.52, 7, 2, '#6b5236'); disc(x, gy-hh*0.80, r, c1); disc(x-r*0.72, gy-hh*0.64, r*0.66, c1); disc(x+r*0.74, gy-hh*0.66, r*0.62, c1); disc(x-r*0.28, gy-hh*0.96, r*0.58, c2); disc(x+r*0.34, gy-hh*0.90, r*0.50, c2); disc(x-r*0.55, gy-hh*0.80, r*0.32, c3||c2); disc(x+r*0.58, gy-hh*0.78, r*0.28, c3||c2); }
+function banana(x, gy, h){ R(x, gy-h, 2, h, '#4e7d44'); for(let i=0;i<5;i++){ const side = i%2 ? 1 : -1; const yy = gy - h + i*5; R(x + (side>0?2:-10), yy, 10, 3, i%2 ? '#6fa35c' : '#5e8a52'); R(x + (side>0?2:-10), yy, 10, 1, '#8cbf78'); } }
+function stoneRail(x0, x1, y){ R(x0, y, x1-x0, 2, '#eef0e8'); R(x0, y+2, x1-x0, 1, '#c8ccc0'); for(let x=x0; x<=x1; x+=8){ R(x, y-4, 3, 6, '#e8ece2'); R(x, y-4, 3, 1, '#ffffff'); R(x+1, y-7, 1, 3, '#dfe4d8'); } }
+function waterWave(x0, x1, y0, y1, t){ for(let x=x0;x<x1;x+=1){ const yy = y0 + Math.round(Math.sin(x*0.09 + t*0.0016)*1.3); if(yy>=y0 && yy<y1){ ctx.fillStyle = 'rgba(200,236,246,.42)'; ctx.fillRect(x, yy, 1, 1); } } }
+
+function st1(cx, gy, t){ const rx = cx - 96; rockMass(rx, gy, 84, 82, 5); rockMass(rx-14, gy, 44, 56, 9); rockMass(rx+16, gy, 40, 62, 13); for(let k=0;k<46;k++){ const py = gy - k; const px = rx - 4 + Math.sin(k*0.16)*9 + Math.sin(k*0.07)*4; R(px, py, 4, 1, '#d6d2c2'); if(k%6<3) R(px+1, py, 2, 1, '#e8e4d4'); } for(let i=0;i<12;i++){ const vx = rx - 40 + (i*37)%80; const vh = 10 + (i*13)%20; R(vx, gy-58 + (i*7)%14, 1, vh, C.jade); R(vx-1, gy-58 + (i*7)%14, 3, 1, C.jadeL); } const mx = rx - 26, my = gy - 88; R(mx-1, my-1, 23, 17, '#8e8e82'); R(mx, my, 21, 15, '#f4f0e0'); R(mx, my, 21, 2, '#ffffff'); R(mx, my, 2, 15, '#ffffff'); R(mx+4, my+4, 12, 1, '#8a8676'); R(mx+4, my+7, 9, 1, '#8a8676'); R(mx+4, my+10, 11, 1, '#8a8676'); R(mx+2, my+13, 17, 1, '#d4cfbc'); const gw = 104, gh = 40, gx = cx + 46; const topY = gy - 12 - gh; R(gx-gw/2-8, gy-3, gw+16, 3, '#e2e2d6'); R(gx-gw/2-5, gy-6, gw+10, 3, '#eeeade'); R(gx-gw/2-2, gy-9, gw+4, 3, '#f4f2e8'); R(gx-gw/2, gy-12, gw, 3, '#f8f6ec'); for(let i=0;i<20;i++){ const px = gx-gw/2 + i*5; R(px, gy-2, 2, 1, '#c2c0ae'); if(i%3===0) R(px+1, gy-5, 2, 1, '#c2c0ae'); } R(gx-gw/2, topY, gw, gh, C.wall); R(gx-gw/2, topY, gw, 2, '#f4f0e2'); for(let y=topY+5; y<gy-12; y+=5){ for(let x=gx-gw/2+3; x<gx+gw/2-2; x+=7){ R(x, y, 5, 1, '#ded8c6'); } } R(gx-gw/2, gy-14, gw, 3, '#b8b4a4'); const doors = [-31, 0, 31]; for(const dx of doors){ const dw = dx===0 ? 20 : 15; const dh = gh - 6; R(gx+dx-dw/2, gy-12-dh, dw, dh, '#3a2b20'); R(gx+dx-dw/2+1, gy-12-dh+1, dw-2, dh-2, '#241a14'); for(let i=0;i<3;i++) R(gx+dx-dw/2+3, gy-12-dh+4+i*6, dw-6, 1, '#8a6a3a'); R(gx+dx-dw/2, gy-12-dh, dw, 1, C.gold); } for(const dx of [-48, 48]){ R(gx+dx-7, gy-12-gh+10, 14, 12, '#4a3a28'); for(let i=0;i<3;i++) R(gx+dx-7, gy-12-gh+10+i*4, 14, 1, '#c9a227'); for(let i=0;i<3;i++) R(gx+dx-6+i*5, gy-12-gh+10, 1, 12, '#c9a227'); } R(gx-13, gy-12-gh-1, 26, 9, '#2e2018'); R(gx-11, gy-12-gh+1, 22, 5, C.gold); R(gx-11, gy-12-gh+1, 22, 1, C.goldL); roof(gx, gy-12-gh, gw+30, 20, C.roofG, C.roofD, C.roofGL, '#1f2a30'); R(gx-24, gy-12-gh-20, 48, 2, '#1f2a30'); R(gx-24, gy-12-gh-21, 48, 1, '#4a5a62'); }
+function st2(cx, gy, t){ R(cx-160, gy+10, 320, 58, C.water); R(cx-160, gy+10, 320, 2, C.waterD); waterWave(cx-158, cx+158, gy+16, gy+60, t); for(let i=0;i<24;i++){ const wx = cx-150 + (i*53)%300; const wy = gy+22 + (i*13)%36; ctx.globalAlpha = 0.35 + 0.35*Math.sin(t*0.002 + i); R(wx, wy, 8+(i*7)%10, 1, C.waterL); ctx.globalAlpha = 1; } R(cx-100, gy+2, 200, 12, C.stone); R(cx-100, gy+2, 200, 2, C.stoneL); R(cx-100, gy+12, 200, 2, C.stoneD); for(const ax of [cx-58, cx, cx+58]){ disc(ax, gy+16, 21, C.waterD); disc(ax, gy+18, 19, '#4d849c'); disc(ax, gy+21, 16, C.water); } for(const px of [cx-87, cx-29, cx+29, cx+87]){ R(px-4, gy+10, 8, 18, C.stoneD); R(px-4, gy+10, 8, 2, C.stone); } for(const ax of [cx-58, cx, cx+58]){ R(ax-5, gy+0, 10, 5, C.stoneL); R(ax-4, gy+1, 8, 3, '#9c9c90'); R(ax-3, gy+2, 2, 2, '#5a5a52'); R(ax+1, gy+2, 2, 2, '#5a5a52'); R(ax-3, gy-2, 2, 2, C.stoneL); R(ax+1, gy-2, 2, 2, C.stoneL); } R(cx-100, gy-2, 200, 2, C.stoneL); for(let i=0;i<12;i++) R(cx-96+i*17, gy-6, 2, 5, C.stoneL); const pw = 60, bodyH = 32; const topY = gy - 4 - bodyH; R(cx-pw/2-4, gy-4, pw+8, 6, C.stoneD); for(const px of [cx-pw/2, cx-pw/6, cx+pw/6, cx+pw/2-3]){ R(px, topY, 3, bodyH, C.pillar); R(px, topY, 1, bodyH, C.pillarL); R(px-1, topY+bodyH-2, 5, 2, C.stoneD); } R(cx-pw/2-3, topY+bodyH-9, pw+6, 2, '#8a3a30'); for(let i=0;i<7;i++) R(cx-pw/2 + i*(pw/6), topY+bodyH-7, 1, 6, '#8a3a30'); R(cx-pw/2-4, topY-3, pw+8, 3, '#5e2a22'); R(cx-9, topY-2, 18, 6, '#2e2018'); R(cx-7, topY-1, 14, 4, C.gold); roof(cx, topY-3, pw+22, 16, C.roof, C.roofD, C.roofL, '#1e2530'); R(cx-1, topY-3-16-6, 2, 6, C.gold); R(cx-2, topY-3-16-8, 4, 2, C.goldL); for(let i=0;i<7;i++){ const tx = cx-150 + i*47; if(Math.abs(tx-cx) < 76) continue; disc(tx, gy-16, 13, '#7fa87e'); disc(tx-6, gy-10, 10, '#6d9870'); disc(tx+7, gy-11, 9, '#6d9870'); R(tx-1, gy-16, 2, 18, '#6b5236'); } }
+function st3(cx, gy, t){ bambooClump(cx-118, gy, 50, 12, t); bambooClump(cx+108, gy, 46, 11, t); const w = 92, h = 38; R(cx-w/2, gy-h, w, h, '#f0e8e0'); R(cx-w/2, gy-h, w, 2, '#ffffff'); R(cx-w/2, gy-h+2, w, 1, '#e4dcd2'); R(cx-w/2-3, gy-h-3, w+6, 3, C.roofG); R(cx-w/2-3, gy-h-4, w+6, 1, C.roofGL); R(cx-w/2, gy-4, w, 4, '#c8c4b6'); R(cx-10, gy-26, 20, 26, '#241a14'); R(cx-8, gy-24, 16, 3, '#5a3a28'); R(cx-10, gy-26, 20, 1, C.gold); let lx = cx + 34; for(let s=0;s<3;s++){ const seg = 16, yy = gy - 16 - (s%2)*4; R(lx, yy, seg, 2, '#6b4c35'); R(lx, yy+2, 2, 16, '#5a3a28'); R(lx+seg-2, yy+2, 2, 16, '#5a3a28'); R(lx, yy, seg, 1, '#9a7a58'); lx += seg - 2; } for(let i=0;i<26;i++){ const px = cx-34 + (i*3); const py = gy-2 + (i%3); R(px, py, 2, 1, '#dcd8c8'); } blossom(cx-52, gy, 11, 34, '#f4f4ec', '#ffffff', '#e8ece0'); banana(cx+52, gy, 32); R(cx-46, gy-6, 92, 4, C.water); R(cx-46, gy-6, 92, 1, C.waterL); for(let i=0;i<12;i++){ R(cx-44 + i*8 + (Math.sin(t*0.003+i)*2), gy-4, 5, 1, '#d8f0f8'); } bambooClump(cx-92, gy, 38, 9, t); bambooClump(cx+82, gy, 42, 10, t); }
+function st4(cx, gy, t){ for(let i=0;i<7;i++){ const vx = cx - 130 + i*38; R(vx, gy-6, 30, 6, '#6a8a3e'); R(vx, gy-6, 30, 1, '#8aa858'); for(let k=0;k<4;k++) R(vx+4+k*7, gy-5, 2, 4, '#9ac060'); } R(cx-116, gy-26, 232, 26, C.clay); R(cx-116, gy-26, 232, 2, '#d8bc84'); R(cx-116, gy-2, 232, 2, C.clayD); for(let x=cx-114;x<cx+114;x+=5){ R(x, gy-30, 2, 5, '#c2a862'); R(x, gy-31, 2, 2, '#d8c070'); } const hw = 68, hh = 30, hx = cx - 12; R(hx-hw/2, gy-hh, hw, hh, '#d8c8a0'); R(hx-hw/2, gy-hh, hw, 2, '#ece0c0'); R(hx-24, gy-22, 13, 11, '#5a4a34'); for(let i=0;i<3;i++) R(hx-24, gy-22+i*4, 13, 1, '#c9b88a'); R(hx+11, gy-22, 13, 11, '#5a4a34'); for(let i=0;i<3;i++) R(hx+11, gy-22+i*4, 13, 1, '#c9b88a'); R(hx-7, gy-18, 14, 18, '#4a3a28'); R(hx-7, gy-18, 14, 2, '#8a6a48'); for(let i=0;i<15;i++){ const p = i/14; const ww = (hw+26)*(0.55 + p*0.45); R(hx-ww/2, gy-hh-15+i, ww, 1, i<2 ? '#d8c07e' : C.thatch); if(i%3===0) for(let x=hx-ww/2+2;x<hx+ww/2-1;x+=4) R(x, gy-hh-15+i, 1, 1, C.thatchD); } R(hx-hw/2-14, gy-hh-3, hw+28, 3, C.thatchD); for(let i=0;i<17;i++){ const bx = cx-124 + i*7; R(bx, gy-18, 2, 18, '#6a8a48'); R(bx, gy-18, 1, 18, '#88a860'); } R(cx-124, gy-12, 118, 2, '#6a8a48'); blossom(cx+74, gy, 18, 48, C.peach, C.peachL, '#f0b0c0'); blossom(cx+96, gy, 13, 36, C.peach, C.peachL, '#f0b0c0'); blossom(cx+50, gy, 10, 28, C.peach, C.peachL, '#f0b0c0'); disc(cx-88, gy-30, 11, '#7a9a5a'); disc(cx-96, gy-24, 9, '#6a8a4a'); R(cx-89, gy-30, 2, 30, '#6b5236'); R(cx-72, gy-14, 17, 14, C.stoneD); R(cx-72, gy-14, 17, 2, C.stone); R(cx-72, gy-14, 2, 14, C.stone); R(cx-64, gy-6, 1, 6, '#4a3a28'); R(cx-66, gy-30, 2, 16, '#6b5236'); R(cx-78, gy-32, 22, 2, '#7a5c3e'); R(cx-78, gy-36, 3, 4, '#6b5236'); R(cx-80, gy-34, 3, 3, '#8a6a48'); R(cx-80, gy-29, 4, 4, '#8a6a48'); }
+function st5(cx, gy, t){ R(cx-180, gy+4, 360, H-gy-4, C.water); R(cx-180, gy+4, 360, 2, '#a4d4e4'); R(cx-180, gy+6, 360, 1, C.waterD); waterWave(cx-178, cx+178, gy+10, H, t); for(let i=0;i<28;i++){ const wx = cx-172 + (i*53)%344; const wy = gy+14 + (i*19)%52; ctx.globalAlpha = 0.22 + 0.30*Math.sin(t*0.002 + i*1.7); R(wx, wy, 6+(i*11)%14, 1, C.waterL); ctx.globalAlpha = 1; } const ix = cx - 12; disc(ix, gy+40, 26, '#93b066'); disc(ix, gy+44, 23, '#7e9c54'); R(ix-26, gy+42, 52, 8, '#7e9c54'); disc(ix, gy+47, 21, C.clayD); R(ix-20, gy+49, 40, 5, C.clayD); for(let i=0;i<10;i++){ const px = ix - 22 + i*4.8; const ph = 12 + (i*7)%13; const sw = Math.sin(t*0.0018 + i)*1.3; for(let k=0;k<ph;k++){ R(px + sw*(k/ph), gy+40-k, 1, 1, k<3 ? '#7a9a5a' : '#688a48'); } for(let k=0;k<5;k++){ ctx.globalAlpha = 0.9; R(px + sw + 0.5, gy+40-ph-k, 2, 1, k%2 ? '#e07a92' : '#f4a6ba'); ctx.globalAlpha = 1; } } for(let i=0;i<4;i++){ const sx = cx-100 + i*21; const sy = gy+52 + Math.sin(i*0.8)*2; R(sx-7, sy, 14, 3, '#8e8e82'); R(sx-7, sy, 14, 1, '#d2d2c6'); R(sx-7, sy+3, 14, 1, '#5a5a52'); } willow(cx+118, gy, 56, t); willow(cx+150, gy+2, 44, t); rockMass(cx-132, gy+4, 76, 56, 21); disc(cx-132, gy-14, 17, '#3f4a44'); disc(cx-132, gy-14, 14, '#171f1d'); R(cx-146, gy-14, 28, 18, '#171f1d'); for(let i=0;i<7;i++){ ctx.globalAlpha = 0.55; R(cx-138 + i*4, gy-10, 2, 8+(i*5)%8, '#a8d8e8'); ctx.globalAlpha = 1; } for(let i=0;i<22;i++){ const fx = cx-170 + (i*67)%340 + Math.sin(t*0.001 + i)*4; const fy = gy+18 + (i*23)%46; R(fx, fy, 2, 1, i%3===0 ? C.peachL : C.peach); } }
+function st6(cx, gy, t){ rockMass(cx+76, gy, 94, 82, 41); rockMass(cx+108, gy, 52, 60, 47); const w = 136, h = 46; const topY = gy - h; R(cx-w/2, topY, w, h, '#e6e8e0'); R(cx-w/2, topY, w, 2, '#f6f8f0'); R(cx-w/2, topY+2, w, 1, '#d8dcd2'); R(cx-w/2, gy-4, w, 4, '#bfc4b8'); for(let y=topY+6; y<gy-6; y+=6){ for(let x=cx-w/2+4; x<cx+w/2-4; x+=9){ R(x, y, 6, 1, '#dcded6'); } } R(cx-w/2-6, topY-8, w+12, 8, '#7e8a86'); R(cx-w/2-6, topY-8, w+12, 2, '#9daaa4'); R(cx-w/2-6, topY-2, w+12, 2, '#5a6662'); for(let x=cx-w/2-4; x<cx+w/2+4; x+=6){ R(x, topY-7, 1, 6, '#68746f'); } const mr = 20; const mgx = cx - 6; disc(mgx, gy-mr, mr+3, '#c8ccc2'); disc(mgx, gy-mr, mr, '#2e3733'); disc(mgx, gy-mr+3, mr-4, '#44514a'); disc(mgx-4, gy-mr+9, 7, '#5d7a55'); disc(mgx+6, gy-mr+11, 6, '#6d8a62'); R(mgx-mr, gy-2, mr*2, 2, '#bfc4b8'); for(let i=0;i<18;i++){ const vx = cx - w/2 + 7 + (i*37)%(w-14); const vh = 18 + (i*13)%(h-12); const sw = Math.sin(t*0.0012 + i)*0.8; for(let k=0;k<vh;k++){ R(vx + sw*(k/vh), topY + 3 + k, 1, 1, k%3 ? '#6f8a5a' : '#89a26c'); } for(let k=5;k<vh;k+=7){ R(vx+sw-1, topY+3+k, 3, 2, i%2 ? '#7f9a62' : '#95ae76'); } } for(let i=0;i<30;i++){ const hx = cx - w/2 - 10 + (i*43)%(w+20); const hh = 10 + (i*17)%18; const sw = Math.sin(t*0.0016 + i*0.8)*1.3; for(let k=0;k<hh;k++){ R(hx + sw*(k/hh), gy - k, 1, 1, k < hh*0.35 ? '#5f7a4a' : '#7d9a5e'); } if(i%3===0) R(hx+sw-1, gy-hh, 3, 2, '#a8c48a'); } for(let i=0;i<22;i++){ const sx = cx-96 + i*9; const sy = gy+3 + (i%3)*2; R(sx, sy, 6, 2, i%2 ? '#c0c0b0' : '#a8a898'); } for(let i=0;i<16;i++){ const fx = cx-56 + (i*37)%112; const fy = gy-46 + (i*13)%30; ctx.globalAlpha = 0.35 + 0.35*Math.sin(t*0.003+i*1.7); R(fx, fy, 1, 1, '#e8f0c0'); ctx.globalAlpha = 1; } }
+function st7(cx, gy, t){ const dx = cx + 52; for(const px of [cx-200, cx+190]){ R(px, gy-42, 3, 42, '#5a4a32'); disc(px+1, gy-44, 13, '#3f6a3e'); disc(px-7, gy-36, 9, '#4e7a48'); disc(px+9, gy-37, 8, '#4e7a48'); disc(px+1, gy-52, 8, '#5e8a52'); } const w = 132, h = 58; R(dx-w/2-20, gy-8, w+40, 8, '#d8d8cc'); R(dx-w/2-18, gy-16, w+36, 8, '#e4e4d8'); R(dx-w/2-14, gy-24, w+28, 8, '#eeeede'); R(dx-w/2-10, gy-30, w+20, 6, '#f6f6ea'); for(let i=0;i<22;i++){ R(dx-w/2-16 + i*8, gy-4, 4, 1, '#c8c8ba'); } stoneRail(dx-w/2-20, dx-w/2-2, gy-32); stoneRail(dx+w/2+2, dx+w/2+20, gy-32); const topY = gy - 30 - h; R(dx-w/2, topY, w, h, '#efe8d6'); R(dx-w/2, topY, w, 2, '#fbf6e8'); for(let i=0;i<7;i++){ const px = dx-w/2+6 + i*((w-12)/6); R(px, topY, 4, h, C.pillar); R(px, topY, 1, h, C.pillarL); } R(dx-w/2, topY+2, w, 4, C.gold); R(dx-w/2, topY+2, w, 1, C.goldL); for(let i=0;i<14;i++){ R(dx-w/2+4 + i*9, topY+3, 3, 2, '#a87c20'); } for(let i=0;i<5;i++){ const wx = dx-w/2+16+i*((w-32)/4); R(wx, topY+18, 16, h-18, '#3a2618'); R(wx, topY+18, 16, 2, C.gold); for(let k=0;k<3;k++) R(wx+2, topY+24+k*7, 12, 1, '#8a6a3a'); } for(const ex of [dx-w/2-2, dx+w/2-2]){ R(ex, topY+8, 4, 6, C.gold); R(ex, topY+6, 4, 2, '#a87c20'); R(ex+1, topY+4, 2, 2, C.goldL); } roof(dx, topY, w+30, 17, C.roof, C.roofD, C.roofL, '#1e2530'); const upY = topY - 17; const uw = w*0.62, uh = 17; R(dx-uw/2, upY-uh, uw, uh, '#efe8d6'); for(let i=0;i<5;i++){ R(dx-uw/2+4 + i*((uw-8)/4), upY-uh, 3, uh, C.pillar); } R(dx-uw/2, upY-uh+2, uw, 3, C.gold); roof(dx, upY-uh, uw+18, 15, C.roof, C.roofD, C.roofL, '#1e2530'); R(dx-2, upY-uh-15-6, 4, 6, C.goldL); R(dx-3, upY-uh-15-8, 6, 2, C.gold); for(const s of [-1,1]){ const bx = dx + s*(w/2+8); const by = topY + 14; R(bx, by, s*46, 3, '#8a3a30'); for(let i=0;i<5;i++){ R(bx + s*(i*10), by+3, 2, 16, '#6b4c35'); } R(bx, by-4, s*46, 2, '#a85a4a'); } for(const s of [-1,1]){ const bx = dx + s*104; R(bx-32, gy-8, 64, 8, '#d8d8cc'); R(bx-28, gy-14, 56, 6, '#e4e4d8'); R(bx-24, gy-46, 48, 32, '#e8e2d0'); for(let i=0;i<3;i++) R(bx-20+i*17, gy-46, 3, 32, C.pillar); roof(bx, gy-46, 58, 12, C.roof, C.roofD, C.roofL); R(bx-8, gy-30, 16, 16, '#3a2618'); R(bx-8, gy-30, 16, 1, C.gold); } const fx = cx - 150; const fh = 76; R(fx-42, gy-fh, 7, fh, '#eef0e8'); R(fx+35, gy-fh, 7, fh, '#eef0e8'); R(fx-42, gy-fh, 2, fh, '#ffffff'); R(fx+35, gy-fh, 2, fh, '#ffffff'); R(fx-46, gy-8, 15, 8, '#c8ccc0'); R(fx+31, gy-8, 15, 8, '#c8ccc0'); R(fx-48, gy-fh+6, 96, 8, '#eef0e8'); R(fx-48, gy-fh+6, 96, 2, '#ffffff'); R(fx-48, gy-fh+14, 96, 3, '#d4d8cc'); for(let i=0;i<10;i++){ R(fx-44+i*9, gy-fh+8, 3, 3, i%2 ? '#c8ccc0' : '#b8bca8'); if(i%3===0) R(fx-44+i*9, gy-fh+8, 1, 1, C.gold); } R(fx-17, gy-fh+7, 34, 5, C.gold); R(fx-17, gy-fh+7, 34, 1, C.goldL); roof(fx, gy-fh, 78, 13, C.roof, C.roofD, C.roofL, '#1e2530'); R(fx-52, gy-3, 104, 3, '#e0e2d8'); }
+function st8(cx, gy, t){ R(cx-146, gy+6, 292, 62, C.water); waterWave(cx-144, cx+144, gy+30, gy+66, t); for(let i=0;i<18;i++){ const wx = cx-140 + (i*47)%280; ctx.globalAlpha = 0.4 + 0.35*Math.sin(t*0.0025+i*1.3); R(wx, gy+40 + (i*13)%22, 10+(i*7)%12, 1, C.waterL); ctx.globalAlpha = 1; } R(cx-108, gy-4, 216, 16, C.stone); R(cx-108, gy-4, 216, 2, C.stoneL); R(cx-108, gy+12, 216, 2, C.stoneD); for(const ax of [cx-64, cx, cx+64]){ disc(ax, gy+16, 22, C.waterD); disc(ax, gy+19, 19, '#4d849c'); } R(cx-108, gy-8, 216, 2, C.stoneL); for(let i=0;i<13;i++) R(cx-104+i*17, gy-12, 2, 5, C.stoneL); R(cx-18, gy-30, 36, 32, '#6b4c35'); R(cx-18, gy-30, 36, 2, '#8a6a48'); R(cx-15, gy-26, 30, 4, '#9a7a58'); for(let i=0;i<8;i++) R(cx-15+i*4, gy-22, 1, 22, '#8a6a48'); R(cx-22, gy-33, 44, 4, '#8a6a48'); R(cx-22, gy-33, 44, 1, '#a88a60'); disc(cx, gy-36, 4, '#5a3a28'); R(cx-1, gy-40, 2, 4, '#7a5c3e'); for(let i=0;i<20;i++){ const wx = cx-30 + i*3; const hh = 22 + (i*7)%14; const flick = Math.sin(t*0.008 + i)*1.5; ctx.globalAlpha = 0.8; R(wx + flick, gy+2, 2, hh, i%2 ? '#c8ecf6' : '#a8d8e8'); ctx.globalAlpha = 1; } for(let i=0;i<16;i++){ const fx = cx-34 + (i*37)%68; const fy = gy+30 + (i*11)%16; ctx.globalAlpha = 0.5 + 0.5*Math.sin(t*0.006+i*2); R(fx, fy, 2, 1, '#ffffff'); ctx.globalAlpha = 1; } }
+function st9(cx, gy, t){ const w = 100, h = 38; const topY = gy - h; R(cx-w/2, topY, w, h, C.wallP); R(cx-w/2, topY, w, 2, '#fceee8'); R(cx-w/2, gy-4, w, 4, '#c8b4ac'); R(cx-w/2-3, topY-3, w+6, 3, C.roofG); R(cx-w/2-3, topY-4, w+6, 1, C.roofGL); R(cx-12, gy-27, 24, 27, '#3a241c'); R(cx-10, gy-25, 20, 25, '#5a3a28'); for(let i=0;i<3;i++) R(cx-9, gy-23+i*7, 18, 1, '#a88a60'); for(let i=0;i<4;i++) R(cx-9+i*6, gy-25, 1, 24, '#a88a60'); R(cx-12, gy-27, 24, 1, C.gold); for(const dx of [-36, 36]){ R(cx+dx-9, gy-28, 18, 12, '#5a3a28'); for(let i=0;i<3;i++) R(cx+dx-9, gy-28+i*4, 18, 1, '#a88a60'); for(let i=0;i<3;i++) R(cx+dx-6+i*6, gy-28, 1, 12, '#a88a60'); } roof(cx, topY-3, w+22, 13, C.roof, C.roofD, C.roofL, '#1e2530'); for(let i=0;i<5;i++){ R(cx-56+i*11, gy-16, 3, 16, '#6b4c35'); } R(cx-58, gy-18, 60, 2, '#8a6a48'); R(cx-58, gy-18, 60, 1, '#a88a60'); rockMass(cx-52, gy, 30, 26, 61); banana(cx-72, gy, 36); banana(cx-88, gy, 30); blossom(cx+68, gy, 19, 50, '#e88098', '#f8b8c8', '#ffd8e0'); blossom(cx+90, gy, 13, 36, '#e88098', '#f8b8c8', '#ffd8e0'); willow(cx+112, gy, 54, t); willow(cx-112, gy, 50, t); for(let i=0;i<10;i++){ const fx = cx+96 + (i*13)%30; const fy = gy-18 + (i*7)%14; R(fx, fy, 2, 2, i%2 ? '#f0a8b8' : '#d88898'); } }
+
+const stations = [
+  {no:'壹', name:'园正门 · 翠嶂', plaque:'题　曲径通幽', text:'大门一开，迎面一座大石头山挡住去路。石头上长满青苔和藤蔓，只留一条小山路。贾政让大家给这条小路起名字。', x:240, draw:st1, flake:['#e8f0d8','#ffffff']},
+  {no:'贰', name:'沁芳亭', plaque:'匾　沁芳　　联　绕堤柳借三篙翠，隔岸花分一脉香', text:'一道清亮的小溪从花木深处流出来，溪上架着石桥，桥上有座小亭子。大家坐在亭子里看水看花。', x:580, draw:st2, flake:['#f0d8e8','#ffe8f0']},
+  {no:'叁', name:'有凤来仪 · 潇湘馆', plaque:'匾　有凤来仪　　联　宝鼎茶闲烟尚绿，幽窗棋罢指犹凉', text:'院子里种着千百竿翠竹，风一吹沙沙响。屋里摆着茶炉和棋盘，窗外的竹影映在窗纸上，绿绿的。', x:920, draw:st3, flake:['#a8d888','#c8eca8']},
+  {no:'肆', name:'杏帘在望 · 稻香村', plaque:'匾　杏帘在望　　联　新涨绿添浣葛处，好云香护采芹人', text:'黄泥墙、茅草屋，墙头伸出稻穗，几百株杏花开得像一片红霞。篱笆外还有一口水井和一片菜地。', x:1260, draw:st4, flake:['#f8c0d0','#ffe0e8']},
+  {no:'伍', name:'蓼汀花溆', plaque:'题　蓼汀花溆（元春后改为「花溆」）', text:'水从石洞里哗哗流出来，洞里垂下藤萝，水面上漂着落花。池边两行垂柳，桃杏花开得遮天蔽日。', x:1600, draw:st5, flake:['#f8c8d8','#ffffff']},
+  {no:'陆', name:'蘅芷清芬 · 蘅芜苑', plaque:'匾　蘅芷清芬　　联　吟成豆蔻才犹艳，睡足荼蘼梦也香', text:'进门先是一座大假山，把屋子挡在后面。院子里没有花，全是各种香草，藤蔓爬满墙柱，闻起来香喷喷的。', x:1940, draw:st6, flake:['#c8e0a8','#e0f0c0']},
+  {no:'柒', name:'省亲正殿 · 玉石牌坊', plaque:'宝玉至此心神恍惚，未能当场拟题，贾政限其一日补题', text:'高高的楼阁，白玉栏杆，正面一座玉石牌坊，上面雕着龙。宝玉看到这里，一时想不出好名字。', x:2280, draw:st7, flake:['#ffe8b8','#e8f0d8']},
+  {no:'捌', name:'沁芳闸', plaque:'宝玉提议「沁芳闸」——贾政当场否决，不肯用沁芳二字', text:'一座大桥，水像帘子一样冲下来，这是全园的水闸。宝玉提议叫「沁芳闸」，贾政不让用这两个字。', x:2620, draw:st8, flake:['#d8f0f8','#ffffff']},
+  {no:'玖', name:'红香绿玉 · 怡红院', plaque:'匾　红香绿玉（元春省亲改为「怡红快绿」）', text:'粉墙绿柳，院里一边是芭蕉，一边是海棠花。屋里木板雕得玲珑，门和窗都藏在里面，走进去容易迷路。', x:2960, draw:st9, flake:['#f8b8c8','#ffe0e8']},
+];
+
+function drawCharacter(t){ const x = Math.round(charX); const bob = Math.sin(t*0.005)*1; const y = Math.round(GY - 24 + bob); ctx.fillStyle = 'rgba(40,50,20,.30)'; ctx.fillRect(x-5, GY-2, 10, 2); R(x-3, y+17, 2, 6, '#2a2418'); R(x+1, y+17, 2, 6, '#2a2418'); R(x-4, y+7, 8, 11, '#a83a34'); R(x-4, y+7, 8, 2, '#c8564a'); R(x-4, y+16, 8, 2, '#7a2420'); R(x-5, y+9, 1, 6, '#8a2a26'); R(x+4, y+9, 1, 6, '#8a2a26'); R(x-4, y+13, 8, 1, C.gold); R(x-3, y, 6, 7, '#f0d6b0'); R(x-3, y, 6, 1, '#fbe8cc'); R(x-3, y-1, 6, 2, '#1c1a20'); R(x-4, y+1, 1, 3, '#1c1a20'); R(x+3, y+1, 1, 3, '#1c1a20'); R(x-2, y-3, 4, 2, '#1c1a20'); R(x-1, y-5, 2, 2, C.gold); R(x-2, y+3, 1, 1, '#2a2018'); R(x+1, y+3, 1, 1, '#2a2018'); R(x+4, y+11, 1, 2, '#8fd0a8'); }
+
+function drawFlakes(t){ const pair = stations[idx].flake; for(let i=0;i<flakes.length;i++){ const f = flakes[i]; f.y += f.vy; f.ph += f.sp; if(f.y > H + 4){ f.y = -4; f.x = Math.random()*W; } const x = f.x + Math.sin(f.ph)*f.sw; const y = f.y; if(x < -6 || x > W+6) continue; ctx.globalAlpha = 0.45 + 0.40*Math.sin(f.ph*1.7 + i); R(x, y, f.sz, f.sz, i%2 ? pair[0] : pair[1]); ctx.globalAlpha = 1; } }
+function drawLightPockets(t){ ctx.globalAlpha = 0.045; for(let i=0;i<5;i++){ const x = (i*137 + t*0.006) % (W+120) - 60; disc(x, 150 + (i%2)*30, 34, '#fff4c8'); } ctx.globalAlpha = 1; }
+
+let camX = 0, charX = stations[0].x - 90;
+let idx = 0, playing = true, tNow = 0;
+let arrived = false;
+let started = false;
+let waitingEnter = false;
+let introPlayed = false;
+let placardWaiting = false;
+
+const DWELL = 8200;
+const PLACARD_HOLD = 1150;
+const PLACARD_GAP  = 1300;
+
+function update(now){ tNow = now; if(!started) return; const s = stations[idx]; const diff = s.x - charX; const step = diff * 0.025; const maxStep = 2.0; charX += clamp(step, -maxStep, maxStep); const camTarget = clamp(charX - W/2, 0, WORLD_W - W); camX += (camTarget - camX) * 0.10; if(!arrived && Math.abs(diff) < 2.5){ charX = s.x; arrived = true; onArrive(); } }
+function render(){ ctx.clearRect(0,0,W,H); drawSky(); drawSun(); drawClouds(tNow); drawBirds(tNow); ridge(camX*0.12, 152, C.hill1, 15, 0.008, 0.019, 0.0045); ridge(camX*0.26, 172, C.hill2, 12, 0.011, 0.026, 0.0065); ridge(camX*0.44, 188, C.hill3, 8, 0.015, 0.033, 0.009); drawHorizonMist(); ctx.save(); ctx.translate(-Math.round(camX), 0); const x0 = Math.max(0, Math.round(camX) - 50); const x1 = Math.min(WORLD_W, Math.round(camX) + W + 50); drawGround(x0, x1); drawPath(x0, x1); drawMidTrees(); for(const s of stations){ if(s.x > x0 - 210 && s.x < x1 + 210) s.draw(s.x, GY, tNow); } drawCharacter(tNow); ctx.restore(); drawLightPockets(tNow); drawFlakes(tNow); }
+function loop(now){ update(now); render(); tickUI(now); requestAnimationFrame(loop); }
+
+const dialog   = document.getElementById('dialog');
+const placard  = document.getElementById('placard');
+const pNo      = document.getElementById('pno');
+const pName    = document.getElementById('pname');
+const elNo     = document.getElementById('cno');
+const elName   = document.getElementById('cname');
+const elPlaque = document.getElementById('cplaque');
+const elText   = document.getElementById('ctext');
+const elStep   = document.getElementById('cstep');
+const elHint   = document.getElementById('chint');
+const elProg   = document.getElementById('cprog');
+const elDots   = document.getElementById('dots');
+const elPlay   = document.getElementById('play');
+
+const NUM_CN = ['一','二','三','四','五','六','七','八','九'];
+
+let dialogShown = false;
+let panelStart  = 0;
+let timers = [];
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+
+const typing = {full:'', n:0, done:true, acc:0, last:0};
+const CHAR_MS = 16;
+
+function startTyping(text){ typing.full = text; typing.n = 0; typing.done = false; typing.acc = 0; typing.last = performance.now(); elText.textContent = ''; }
+function tickTyping(now){ if(typing.done) return; typing.acc += now - typing.last; typing.last = now; while(typing.acc >= CHAR_MS && typing.n < typing.full.length){ typing.acc -= CHAR_MS; typing.n++; } if(typing.n < typing.full.length){ elText.textContent = typing.full.slice(0, typing.n) + '▌'; }else{ typing.done = true; elText.textContent = typing.full; } }
+function tickUI(now){ tickTyping(now); if(playing && dialogShown){ const span = Math.max(1, DWELL - PLACARD_GAP - 200); const p = clamp((now - panelStart) / span, 0, 1); elProg.style.width = (p*100).toFixed(2) + '%'; } }
+
+function mainName(name){ const i = name.indexOf(' · '); return i > 0 ? name.slice(0, i) : name; }
+function hideDialog(){ if(dialogShown){ dialog.classList.remove('show'); dialog.classList.add('hide'); dialogShown = false; } }
+
+function showPanel(s){
+  elNo.textContent     = s.no;
+  elName.textContent   = s.name;
+  elPlaque.textContent = s.plaque;
+  elStep.textContent   = NUM_CN[idx] + ' / 九';
+  elHint.textContent   = playing ? '自动游览中' : '已暂停';
+  elProg.style.width   = '0%';
+  startTyping(s.text);
+  dialog.classList.remove('hide');
+  void dialog.offsetWidth;
+  dialog.classList.add('show');
+  dialogShown = true;
+  panelStart  = performance.now();
+}
+
+function onArrive(){
+  const s = stations[idx];
+  clearTimers();
+  placard.classList.remove('show','hide','clickable');
+  void placard.offsetWidth;
+  pNo.textContent   = s.no;
+  pName.textContent = mainName(s.name);
+  placard.classList.add('show');
+
+  /* 只有第一站首次需要点击；其他站恢复自动 */
+  if (idx === 0 && !introPlayed) {
+    placard.classList.add('clickable');
+    placardWaiting = true;
+  } else {
+    timers.push(setTimeout(()=>{ placard.classList.remove('show'); placard.classList.add('hide'); }, PLACARD_HOLD));
+    timers.push(setTimeout(()=>{
+      showPanel(s);
+      waitingEnter = true;
+      dialog.classList.add('enterable');
+      elHint.textContent = '可进入此景';
+    }, PLACARD_GAP));
+  }
+}
+
+function afterPlacard(){
+  const s = stations[idx];
+  playing = false;
+  elPlay.textContent = '继续';
+  playStory('intro', () => {
+    introPlayed = true;
+    showPanel(s);
+    waitingEnter = true;
+    dialog.classList.add('enterable');
+    elHint.textContent = '可进入此景';
+    playing = false;
+    elPlay.textContent = '继续';
+  });
+}
+
+function setStation(i){
+  idx = ((i % stations.length) + stations.length) % stations.length;
+  arrived = false;
+  clearTimers();
+  waitingEnter = false;
+  placardWaiting = false;
+  dialog.classList.remove('enterable');
+  hideDialog();
+  placard.classList.remove('show','hide','clickable');
+  elProg.style.width = '0%';
+  [...elDots.children].forEach((d,k)=> d.classList.toggle('on', k===idx));
+}
+
+/* ============================================================
+   剧情引擎
+   ============================================================ */
+
+const CAST = {
+  narr:   { name: '旁白' },
+  player: { name: '贾宝玉', role: '主角', desc: '就是我。爱玩，不爱读正经书。', img: 'player.png', emos: {
+    smile:   'player_smile.png',
+    think:   'player_think.png',
+    recite:  'player_recite.png',
+    nervous: 'player_nervous.png'
+  }},
+  jia:    { name: '贾政', role: '我爹', desc: '很严格，一见我就板脸，其实心里疼我。', img: 'npc1.png', emos: {
+    stern:      'npc1_stern.png',
+    nod:        'npc1_nod.png',
+    displeased: 'npc1_displeased.png',
+    angry:      'npc1_angry.png',
+    sneer:      'npc1_sneer.png'
+  }},
+  qingke: { name: '清客', role: '爹的朋友', desc: '专会夸人，我随便说什么他们都说好。', img: 'npc2.png', emos: {
+    praise: 'npc2_praise.png',
+    worry:  'npc2_worry.png'
+  }},
+  zhen:   { name: '贾珍', role: '管事的侄子', desc: '年纪比我大，却得叫我「二叔」。见了我爹就慌。', img: 'npc3.png', emos: {
+    panic: 'npc3_panic.png'
+  }}
+};
+
+const STORY = {
+  intro: {
+  bg: 'bg0.png',
+  script: [
+    { type:'say', who:'narr', text:'我正独自在大观园里闲逛，贾珍匆匆跑来叫我躲开，可已经来不及。' },
+    { type:'say', who:'zhen', emo:'panic', text:'宝二叔！快躲一躲——老爷往这边来了！' },
+    { type:'say', who:'narr', text:'一转头，就看见父亲贾政，带着一群清客相公走了过来。' },
+    { type:'say', who:'jia', emo:'stern', text:'今日游园，看到景物，你便说出自己的想法，不许敷衍胡闹。' },
+    { type:'say', who:'narr', text:'我心里有点紧张，只能跟在众人身后，开启这场游园考验。' },
+    { type:'say', who:'narr', text:'我便跟在众人身后，往园门里走去。' },
+    { type:'end', result:'success' }
+  ]
+},
+
+  s0: {
+  bg: 'bg1.png',
+  script: [
+    { type:'say', who:'narr', text:'走到园子入口，迎面一座巨大翠嶂假山，把园内风景全部遮挡住。山顶有一块平整的镜面白石，专门用来题写匾额。' },
+    { type:'say', who:'narr', text:'几位清客抢先开口，说了"叠翠""锦嶂"这类名字。父亲转头看向我，该轮到我发表看法了。' },
+    { type:'label', name:'ask' },
+    { type:'choice', options: [
+      { text:'A　引用古诗，题「曲径通幽处」', goto:'a' },
+      { text:'B　跟着清客，也说「锦嶂」', goto:'b' },
+      { text:'C　随便想一个稀奇古怪的名字', goto:'c' }
+    ]},
+    { type:'label', name:'a' },
+    { type:'say', who:'player', emo:'smile', text:'不如写"曲径通幽处"，借用旧诗，大方气派。' },
+    { type:'say', who:'qingke', emo:'praise', text:'好！好！二爷天分高，我们想不出这样的句子。' },
+    { type:'say', who:'jia', emo:'nod', text:'（淡淡地）不可过分夸奖他。' },
+    { type:'say', who:'narr', text:'父亲嘴上推辞，但我看得出来，他心里是认可的。' },
+    { type:'end', result:'success' },
+    { type:'label', name:'b' },
+    { type:'say', who:'player', text:'叫"锦嶂"就很好。' },
+    { type:'say', who:'jia', emo:'displeased', text:'这是旁人已经说过的，没有新意，再仔细想一想。' },
+    { type:'jump', to:'ask' },
+    { type:'label', name:'c' },
+    { type:'say', who:'narr', text:'我随口编了一个稀奇古怪的名字。' },
+    { type:'say', who:'jia', emo:'angry', text:'观景题字，岂可如此肆意胡闹！' },
+    { type:'end', result:'fail', text:'我被父亲厉声斥责，考察提前结束。\n【小失败结局】' }
+  ]
+},
+
+  s1: {
+    bg: 'bg2.png',
+    script: [
+      { type:'say', who:'narr', text:'我们来到水上的石桥亭子，桥下溪水叮咚，四周花木繁茂。' },
+      { type:'say', who:'qingke', text:'依我拙见，此处可题"翼然"二字。' },
+      { type:'say', who:'jia', text:'"翼然"虽好，只是此亭压水而成，还须有水的意思。我看用"泻"字，题"泻玉"如何？' },
+      { type:'say', who:'narr', text:'父亲望向我，问我对"泻玉"这个名字怎么看。' },
+      { type:'label', name:'ask' },
+      { type:'choice', options: [
+        { text:'A　"泻"字粗陋不雅，建议题名「沁芳」，再作一副对联', goto:'a' },
+        { text:'B　赞同，觉得「泻玉」十分绝妙', goto:'b' },
+        { text:'C　低头沉默，一言不发', goto:'c' }
+      ]},
+      { type:'label', name:'a' },
+      { type:'say', who:'player', text:'"泻"字略显粗陋，不如唤作"沁芳"。' },
+      { type:'say', who:'jia', text:'（捻着胡须，沉默点头）那你再作一副对联。' },
+      { type:'say', who:'player', text:'绕堤柳借三篙翠，隔岸花分一脉香。' },
+      { type:'say', who:'qingke', text:'妙啊！妙啊！' },
+      { type:'end', result:'success' },
+      { type:'label', name:'b' },
+      { type:'say', who:'player', text:'"泻玉"十分绝妙。' },
+      { type:'say', who:'jia', text:'只会附和旁人，没有自己见解，再好好思量。' },
+      { type:'jump', to:'ask' },
+      { type:'label', name:'c' },
+      { type:'say', who:'narr', text:'我心里紧张，低着头不敢说话。' },
+      { type:'say', who:'jia', text:'问你话，为何缄口不语！' },
+      { type:'end', result:'fail', text:'遭受训斥，考察草草收场。\n【小失败结局】' }
+    ]
+  },
+
+  s2: {
+    bg: 'bg3.png',
+    script: [
+      { type:'say', who:'narr', text:'眼前院落，千百竿翠竹遮天蔽日，院内游廊曲折，后院种着梨花、芭蕉，一道清泉绕着房屋，从竹林底下流过。' },
+      { type:'say', who:'qingke', text:'此处可题"淇水遗风"，再不然"睢园雅迹"。' },
+      { type:'say', who:'jia', text:'都太俗了。' },
+      { type:'say', who:'narr', text:'现在轮到我来拟写匾额。' },
+      { type:'label', name:'ask' },
+      { type:'choice', options: [
+        { text:'A　题「有凤来仪」，再吟出对应对联', goto:'a' },
+        { text:'B　直接采用清客说的「淇水遗风」', goto:'b' },
+        { text:'C　直言这个院落景色平平', goto:'c' }
+      ]},
+      { type:'label', name:'a' },
+      { type:'say', who:'narr', text:'我心里暗想，这里是贵妃有可能到访的地方，应当颂圣。' },
+      { type:'say', who:'player', text:'不如题"有凤来仪"。' },
+      { type:'say', who:'qingke', text:'好！好！' },
+      { type:'say', who:'player', text:'宝鼎茶闲烟尚绿，幽窗棋罢指犹凉。' },
+      { type:'say', who:'jia', text:'（嘴上）也未见长。（心里）倒也没真怪罪。' },
+      { type:'end', result:'success' },
+      { type:'label', name:'b' },
+      { type:'say', who:'player', text:'就用"淇水遗风"。' },
+      { type:'say', who:'jia', text:'落入俗套，不肯自己动脑！' },
+      { type:'jump', to:'ask' },
+      { type:'label', name:'c' },
+      { type:'say', who:'player', text:'我看这院子景色也不过平平。' },
+      { type:'say', who:'jia', text:'如此清雅去处，你竟不识！' },
+      { type:'end', result:'fail', text:'父亲十分生气。\n【小失败结局】' }
+    ]
+  },
+
+  s3: {
+    bg: 'bg4.png',
+    script: [
+      { type:'say', who:'narr', text:'眼前是一派农家景象，黄泥矮墙，墙头铺着稻秆，满树杏花如火，茅草屋舍、青竹篱笆，外面还有菜畦、土井辘轳。' },
+      { type:'say', who:'qingke', text:'此处题"杏花村"最妙。' },
+      { type:'say', who:'jia', text:'（看向我）你也说说看。' },
+      { type:'label', name:'ask' },
+      { type:'choice', options: [
+        { text:'A　题「杏帘在望」，另取别号「稻香村」，再题对联', goto:'a' },
+        { text:'B　直接采用「杏花村」', goto:'b' },
+        { text:'C　直言这里是人工伪造田园，并不自然', goto:'c' }
+      ]},
+      { type:'label', name:'a' },
+      { type:'say', who:'player', text:'题名"杏帘在望"，还可叫"稻香村"。' },
+      { type:'say', who:'qingke', text:'（拍手）妙极！妙极！' },
+      { type:'say', who:'jia', text:'（故意呵斥）就爱卖弄！既如此，再作一副对联来。' },
+      { type:'say', who:'player', text:'新涨绿添浣葛处，好云香护采芹人。' },
+      { type:'end', result:'success' },
+      { type:'label', name:'b' },
+      { type:'say', who:'player', text:'就叫"杏花村"。' },
+      { type:'say', who:'jia', text:'这个名字犯了村的本名，不合适。' },
+      { type:'jump', to:'ask' },
+      { type:'label', name:'c' },
+      { type:'say', who:'player', text:'这是人力硬造出来的田庄，缺少天然意趣。' },
+      { type:'say', who:'jia', text:'叉出去！' },
+      { type:'end', result:'fail', text:'父亲勃然大怒。\n【小失败结局】' }
+    ]
+  },
+
+  s4: {
+    bg: 'bg5.png',
+    script: [
+      { type:'say', who:'narr', text:'石洞当中流出潺潺泉水，藤蔓垂挂洞口，水面漂浮片片落花，两岸桃柳成荫。' },
+      { type:'say', who:'qingke', text:'此处题"武陵源"如何？或者"秦人旧舍"？' },
+      { type:'say', who:'narr', text:'父亲不置可否，转头看我。' },
+      { type:'label', name:'ask' },
+      { type:'choice', options: [
+        { text:'A　题「蓼汀花溆」', goto:'a' },
+        { text:'B　赞同，取名「武陵源」', goto:'b' }
+      ]},
+      { type:'label', name:'a' },
+      { type:'say', who:'narr', text:'我心想"秦人旧舍"暗含避乱典故，不适合省亲别墅。' },
+      { type:'say', who:'player', text:'不如题"蓼汀花溆"。' },
+      { type:'say', who:'jia', text:'（嘴上批评）胡说。' },
+      { type:'say', who:'narr', text:'父亲嘴上批评，却依旧带着众人继续向前。' },
+      { type:'end', result:'success' },
+      { type:'label', name:'b' },
+      { type:'say', who:'player', text:'我看"武陵源"就很好。' },
+      { type:'say', who:'jia', text:'名字老旧落实，不可用。' },
+      { type:'jump', to:'ask' }
+    ]
+  },
+
+  s5: {
+    bg: 'bg6.png',
+    script: [
+      { type:'say', who:'narr', text:'这座院子没有高大树木，遍地都是奇花异草，藤蔓缠绕山石廊柱，香气幽幽弥漫整个庭院。' },
+      { type:'say', who:'qingke', text:'（接连念了几副对联）……' },
+      { type:'say', who:'jia', text:'（看向我）你也拟一副来。' },
+      { type:'label', name:'ask' },
+      { type:'choice', options: [
+        { text:'A　题「蘅芷清芬」，对联：吟成豆蔻才犹艳，睡足荼蘼梦也香', goto:'a' },
+        { text:'B　直接照搬清客所作的对联', goto:'b' }
+      ]},
+      { type:'label', name:'a' },
+      { type:'say', who:'player', text:'题"蘅芷清芬"。对联是——吟成豆蔻才犹艳，睡足荼蘼梦也香。' },
+      { type:'say', who:'qingke', text:'二爷好句！' },
+      { type:'say', who:'jia', text:'（嘴上）这是仿写前人，不算佳作。' },
+      { type:'say', who:'narr', text:'父亲嘴上这样说，众人却都听得出他心情不坏。' },
+      { type:'end', result:'success' },
+      { type:'label', name:'b' },
+      { type:'say', who:'player', text:'（复述清客写好的对联）' },
+      { type:'say', who:'jia', text:'只会捡拾别人的文字，没有自己的构思！' },
+      { type:'jump', to:'ask' }
+    ]
+  },
+
+  s6: {
+    bg: 'bg7.png',
+    script: [
+      { type:'say', who:'narr', text:'巍峨宏伟的省亲大殿，一座雕刻精美的玉石牌坊立在面前。' },
+      { type:'say', who:'narr', text:'看见牌坊，我心头恍惚，仿佛在梦里见过这处景象，一时间脑子空空，想不出合适词句。' },
+      { type:'label', name:'ask' },
+      { type:'choice', options: [
+        { text:'A　如实坦白，此刻想不出佳句，请求日后再补作', goto:'a' },
+        { text:'B　硬凑，胡乱编造一段文字', goto:'b' }
+      ]},
+      { type:'label', name:'a' },
+      { type:'say', who:'player', text:'（老实）父亲，儿子此刻实在没有好构思。' },
+      { type:'say', who:'qingke', text:'（连忙劝解）二爷年纪尚小，慢慢再想便是。' },
+      { type:'say', who:'jia', text:'（冷笑）想不到你也有想不出来的时候。限你一日之内补写完毕。' },
+      { type:'say', who:'narr', text:'我松了一口气，跟着众人继续向前。' },
+      { type:'end', result:'success' },
+      { type:'label', name:'b' },
+      { type:'say', who:'player', text:'（绞尽脑汁，硬凑出不通顺的文句）' },
+      { type:'say', who:'jia', text:'（连连摇头）罢了，罢了。' },
+      { type:'say', who:'narr', text:'父亲满脸失望，游园草草结束。' },
+      { type:'end', result:'normal', text:'【普通结局】游园草草结束。' }
+    ]
+  },
+
+  s7: {
+    bg: 'bg8.png',
+    script: [
+      { type:'say', who:'narr', text:'一座大桥横跨水面，水从桥下奔涌而出，像一挂帘子。这是全园的水闸。' },
+      { type:'say', who:'jia', text:'此处也该有个名字。' },
+      { type:'say', who:'player', text:'不如就叫"沁芳闸"。' },
+      { type:'say', who:'jia', text:'（摆手）偏不用"沁芳"二字。' },
+      { type:'say', who:'narr', text:'父亲嘴上不肯用，众人也不敢再提。我们继续向前走去。' },
+      { type:'end', result:'success' }
+    ]
+  },
+
+  s8: {
+    bg: 'bg9.png',
+    script: [
+      { type:'say', who:'narr', text:'院落当中，一边种芭蕉，一边是美艳的西府海棠。屋内雕梁隔扇，机关精巧，很容易迷路。' },
+      { type:'say', who:'qingke', text:'此处可题"崇光泛彩"。' },
+      { type:'say', who:'narr', text:'父亲等待我的想法。' },
+      { type:'label', name:'ask' },
+      { type:'choice', options: [
+        { text:'A　题「红香绿玉」，兼顾芭蕉之绿、海棠之红', goto:'a' },
+        { text:'B　直接用「崇光泛彩」', goto:'b' }
+      ]},
+      { type:'label', name:'a' },
+      { type:'say', who:'player', text:'芭蕉为绿，海棠为红，题"红香绿玉"，两处景物都兼顾到。' },
+      { type:'say', who:'jia', text:'（摆手连说）不好，不好。' },
+      { type:'say', who:'narr', text:'父亲嘴上说不好，但我能看出，他记住了这个名字。这一日的游园试才，总算有惊无险。' },
+      { type:'end', result:'success' },
+      { type:'label', name:'b' },
+      { type:'say', who:'player', text:'就用"崇光泛彩"罢。' },
+      { type:'say', who:'jia', text:'又是拾人牙慧，毫无新意。' },
+      { type:'end', result:'fail', text:'父亲失望，游园草草结束。\n【小失败结局】' }
+    ]
+  }
+};
+
+/* ---------- 剧情引擎状态 ---------- */
+const rpgScene   = document.getElementById('rpgScene');
+const rpgBg      = document.getElementById('rpgBg');
+const rpgDialog  = document.getElementById('rpgDialog');
+const rpgName    = document.getElementById('rpgName');
+const rpgText    = document.getElementById('rpgText');
+const rpgNext    = document.getElementById('rpgNext');
+const rpgChoices = document.getElementById('rpgChoices');
+const rpgActions = document.getElementById('rpgActions');
+const charL      = document.getElementById('charL');
+const charR      = document.getElementById('charR');
+const exitRpg    = document.getElementById('exitRpg');
+
+const introCard = document.getElementById('introCard');
+const icImg     = document.getElementById('icImg');
+const icName    = document.getElementById('icName');
+const icRole    = document.getElementById('icRole');
+const icDesc    = document.getElementById('icDesc');
+const shownCards = new Set();
+let cardWaiting = false;
+let pendingText = '';
+
+let storyKey  = null;
+let script    = [];
+let labels    = {};
+let pc        = 0;
+let typingNow = false;
+let typeTimer = null;
+let curFull   = '';
+let storyDone = null;
+let waitingEnd = false;
+let lastChoicePc = -1;
+
+function showIntroCard(who) {
+  const actor = CAST[who];
+  if (!actor || !actor.role || shownCards.has(who)) return false;
+  shownCards.add(who);
+
+  icImg.src = actor.img;
+  icName.textContent = actor.name;
+  icRole.textContent = actor.role;
+  icDesc.textContent = actor.desc || '';
+
+  introCard.classList.add('show');
+  cardWaiting = true;
+  return true;
+}
+
+function setCharImg(el, src) {
+  if (!src) { el.style.visibility = 'hidden'; return; }
+  if (el.dataset.src === src) { el.style.visibility = 'visible'; return; }
+  el.dataset.src = src;
+  el.style.visibility = 'hidden';
+  el.onload  = () => { el.style.visibility = 'visible'; };
+  el.onerror = () => { el.style.visibility = 'hidden'; };
+  el.src = src;
+}
+
+function setSpeaker(who, emo) {
+  const actor = CAST[who];
+  if (who === 'player') {
+    const emoSrc = (actor.emos && actor.emos[emo]) || actor.img;
+    setCharImg(charR, emoSrc);
+    charR.classList.add('speaking');
+    charL.classList.remove('speaking');
+  } else if (who === 'narr' || !actor) {
+    charR.classList.remove('speaking');
+    charL.classList.remove('speaking');
+  } else {
+    const emoSrc = (actor.emos && actor.emos[emo]) || actor.img;
+    setCharImg(charL, emoSrc);
+    charL.classList.add('active');
+    charL.classList.add('speaking');
+    charR.classList.remove('speaking');
+  }
+}
+
+function typeText(text) {
+  curFull = text;
+  typingNow = true;
+  rpgText.textContent = '';
+  rpgNext.style.display = 'none';
+  clearInterval(typeTimer);
+  let i = 0;
+  typeTimer = setInterval(() => {
+    if (i < text.length) {
+      rpgText.textContent = text.slice(0, ++i);
+    } else {
+      clearInterval(typeTimer);
+      typingNow = false;
+      rpgNext.style.display = 'block';
+    }
+  }, 26);
+}
+
+function doSay(cmd) {
+  const actor = CAST[cmd.who] || { name: '旁白' };
+  setSpeaker(cmd.who, cmd.emo);
+  rpgName.textContent = actor.name;
+  const isNew = showIntroCard(cmd.who);
+  if (isNew) {
+    clearInterval(typeTimer);
+    rpgText.textContent = '';
+    typingNow = false;
+    rpgNext.style.display = 'none';
+    pendingText = cmd.text;
+  } else {
+    typeText(cmd.text);
+  }
+}
+
+function doChoice(cmd) {
+  lastChoicePc = pc;
+  rpgChoices.innerHTML = '';
+  rpgNext.style.display = 'none';
+  cmd.options.forEach((opt, k) => {
+    const b = document.createElement('button');
+    b.className = 'rpg-choice';
+    b.textContent = opt.text;
+    b.style.animationDelay = (k * 0.06) + 's';
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      rpgChoices.classList.remove('show');
+      rpgChoices.innerHTML = '';
+      pc = labels[opt.goto];
+      if (pc === undefined) pc = script.length;
+      runCmd();
+    });
+    rpgChoices.appendChild(b);
+  });
+  rpgChoices.classList.add('show');
+}
+
+function runCmd() {
+  if (pc >= script.length) { endStory('success'); return; }
+  const cmd = script[pc];
+  switch (cmd.type) {
+    case 'label': pc++; runCmd(); break;
+    case 'jump':  pc = (labels[cmd.to] === undefined ? script.length : labels[cmd.to]); runCmd(); break;
+    case 'say':   doSay(cmd); break;
+    case 'choice': doChoice(cmd); break;
+    case 'end':   endStory(cmd.result, cmd.text); break;
+    default: pc++; runCmd();
+  }
+}
+
+function endStory(result, text) {
+  if (result === 'success') { exitStory(true); return; }
+  waitingEnd = true;
+  typingNow = false;
+  clearInterval(typeTimer);
+  rpgNext.style.display = 'none';
+  rpgChoices.classList.remove('show');
+  rpgChoices.innerHTML = '';
+  rpgName.textContent = (result === 'fail') ? '小 失 败' : '游 园 结 束';
+  rpgText.textContent = text || '游园考验到此为止。';
+  rpgText.style.whiteSpace = 'pre-line';
+  rpgActions.style.display = 'flex';
+}
+
+function exitStory(continueTour) {
+  rpgScene.classList.remove('show');
+  introCard.classList.remove('show');
+  cardWaiting = false;
+  pendingText = '';
+  rpgActions.style.display = 'none';
+  rpgChoices.classList.remove('show');
+  rpgChoices.innerHTML = '';
+  rpgText.style.whiteSpace = 'normal';
+  waitingEnd = false;
+  typingNow = false;
+  clearInterval(typeTimer);
+  charL.classList.remove('active', 'speaking');
+  charR.classList.remove('active', 'speaking');
+  const cb = storyDone;
+  storyDone = null;
+  if (cb) cb(continueTour ? 'success' : 'exit');
+}
+
+function playStory(key, onDone) {
+  const s = STORY[key];
+  if (!s) { if (onDone) onDone('success'); return; }
+  storyKey = key;
+  script = s.script;
+  labels = {};
+  script.forEach((cmd, i) => { if (cmd.type === 'label') labels[cmd.name] = i; });
+  pc = 0;
+  lastChoicePc = -1;
+  storyDone = onDone;
+
+  rpgBg.style.backgroundImage = `url('${s.bg}')`;
+  rpgScene.classList.add('show');
+  rpgActions.style.display = 'none';
+  rpgChoices.classList.remove('show');
+  rpgChoices.innerHTML = '';
+  rpgText.style.whiteSpace = 'normal';
+  rpgText.textContent = '';
+  rpgName.textContent = '旁白';
+  rpgNext.style.display = 'none';
+  introCard.classList.remove('show');
+  cardWaiting = false;
+  pendingText = '';
+
+  setCharImg(charR, CAST.player.img);
+  charR.classList.add('active');
+  charR.classList.remove('speaking');
+  charL.classList.remove('active', 'speaking');
+
+  exitRpg.style.display = (key === 'intro') ? 'none' : 'block';
+
+  runCmd();
+}
+
+/* ---------- 点击推进 ---------- */
+rpgScene.addEventListener('click', (e) => {
+  if (e.target.closest('.rpg-choice, .rpg-btn, .rpg-exit')) return;
+
+  if (cardWaiting) {
+    cardWaiting = false;
+    introCard.classList.remove('show');
+    typeText(pendingText);
+    return;
+  }
+
+  if (waitingEnd) return;
+  if (rpgChoices.classList.contains('show')) return;
+
+  if (typingNow) {
+    clearInterval(typeTimer);
+    rpgText.textContent = curFull;
+    typingNow = false;
+    rpgNext.style.display = 'block';
+    return;
+  }
+  pc++;
+  runCmd();
+});
+
+exitRpg.addEventListener('click', (e) => {
+  e.stopPropagation();
+  exitStory(false);
+});
+
+document.getElementById('retryBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (lastChoicePc < 0) { exitStory(false); return; }
+
+  waitingEnd = false;
+  typingNow = false;
+  clearInterval(typeTimer);
+
+  rpgActions.style.display = 'none';
+  rpgChoices.classList.remove('show');
+  rpgChoices.innerHTML = '';
+  rpgText.style.whiteSpace = 'normal';
+  rpgText.textContent = '';
+  rpgName.textContent = '旁白';
+  rpgNext.style.display = 'none';
+
+  charL.classList.remove('speaking');
+  charR.classList.remove('speaking');
+
+  pc = lastChoicePc;
+  runCmd();
+});
+
+document.getElementById('backBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  exitStory(false);
+});
+
+/* ---------- 卷轴 ↔ 剧情 衔接 ---------- */
+function enterScene() {
+  if (!waitingEnter) return;
+  waitingEnter = false;
+  playing = false;
+  hideDialog();
+  placard.classList.remove('show', 'hide', 'clickable');
+  dialog.classList.remove('enterable');
+  elPlay.textContent = '继续';
+
+  playStory('s' + idx, (result) => {
+    if (result === 'success') {
+      playing = true;
+      elPlay.textContent = '暂停';
+      elHint.textContent = '自动游览中';
+    } else {
+      reshowDialog();
+    }
+  });
+}
+
+function reshowDialog() {
+  const s = stations[idx];
+  showPanel(s);
+  waitingEnter = true;
+  dialog.classList.add('enterable');
+  elHint.textContent = '可进入此景';
+  playing = false;
+  elPlay.textContent = '继续';
+}
+
+document.getElementById('enterBtn').addEventListener('click', enterScene);
+
+/* placard 点击：仅第一站首次可点 */
+placard.addEventListener('click', () => {
+  if (!placardWaiting) return;
+  placardWaiting = false;
+  placard.classList.remove('show', 'clickable');
+  placard.classList.add('hide');
+  afterPlacard();
+});
+
+stations.forEach((s,i)=>{
+  const b = document.createElement('button');
+  b.className = 'dot' + (i===0?' on':'');
+  b.title = s.name;
+  b.addEventListener('click', ()=>{ setStation(i); });
+  elDots.appendChild(b);
+});
+document.getElementById('prev').addEventListener('click', ()=> setStation(idx-1));
+document.getElementById('next').addEventListener('click', ()=> setStation(idx+1));
+elPlay.addEventListener('click', ()=>{
+  playing = !playing;
+  elPlay.textContent = playing ? '暂停' : '继续';
+  elHint.textContent = playing ? '自动游览中' : '已暂停';
+  if(playing){ if(dialogShown) panelStart = performance.now(); }
+});
+window.addEventListener('keydown', e=>{
+  if (rpgScene.classList.contains('show')) return;
+  if(e.key === 'ArrowRight') setStation(idx+1);
+  if(e.key === 'ArrowLeft') setStation(idx-1);
+  if(e.key === 'Enter' && waitingEnter) enterScene();
+});
+
+/* ---------- 卷轴展开 ---------- */
+const paper = document.getElementById('paper');
+const rodL  = document.getElementById('rodL');
+const rodR  = document.getElementById('rodR');
+const easeOutCubic = x => 1 - Math.pow(1-x, 3);
+
+function unroll(){
+  const dur = 1900;
+  const t0 = performance.now();
+  function step(now){
+    const p = Math.min(1, (now - t0)/dur);
+    const e = easeOutCubic(p);
+    const half = 50 * (1 - e);
+    paper.style.clipPath = `inset(0 ${half}% 0 ${half}%)`;
+    rodL.style.left = half + '%';
+    rodR.style.left = (100 - half) + '%';
+    if(p < 1){
+      requestAnimationFrame(step);
+    }else{
+      paper.style.clipPath = 'inset(0 0 0 0)';
+      document.body.classList.add('ready');
+      started = true;
+      setStation(0);
+      playing = false;
+      elPlay.textContent = '继续';
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+requestAnimationFrame(loop);
+setTimeout(unroll, 420);
+</script>
+</body>
+</html>
