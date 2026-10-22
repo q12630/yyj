@@ -2080,164 +2080,164 @@ const Game = {
       <div class="g-qs">${LANG==='t'?'選一個字填進去':'选一个字填进去'}</div>
       <div class="g-opts">${it.opts.map(o=>`<button class="g-opt" data-o="${esc(o)}">${esc(T(o))}</button>`).join('')}</div>
       <div class="g-fb" id="gFb"></div>`;
-    $$('#GBODY.g-opt').foreach(b=>b.addEventListener('单击', ()=>{
-      如果(这.锁定) 返回; 这.锁定=正确;
-      Const 好的=b.数据集.o===它.答;
-      b.classList.添加(好的?'右':'错误');
-      如果(!好的) $$('#GBODY.g-opt').foreach(x=>{ 如果(x.数据集.o===它.答) x.classList.添加('右'); });
-      如果(好的){ 这.分数++;测验.正确的++;snd.好的(); } 其他 snd.坏的();
-      测验.全部的++;
-      $('#gFb').innerHTML=(好的?'<b>'+(朗==='T'?'答对了！':'答对了！')+'</b>':'<b>'+(朗==='T'?'再想想：':'再想想：')+'</b>')+ESC(T(它.提示));
-      $('#gNext').禁用=假的;
+    $$('#gBody .g-opt').forEach(b=> b.addEventListener('click', ()=>{
+      if(this.locked) return; this.locked=true;
+      const ok = b.dataset.o===it.ans;
+      b.classList.add(ok?'right':'wrong');
+      if(!ok) $$('#gBody .g-opt').forEach(x=>{ if(x.dataset.o===it.ans) x.classList.add('right'); });
+      if(ok){ this.score++; QUIZ.right++; Snd.ok(); } else Snd.bad();
+      QUIZ.total++;
+      $('#gFb').innerHTML = (ok?'<b>'+(LANG==='t'?'答對了！':'答对了！')+'</b> ':'<b>'+(LANG==='t'?'再想想：':'再想想：')+'</b> ') + esc(T(it.tip));
+      $('#gNext').disabled=false;
     }));
-    $('#gNext').禁用=正确;
-    $('#gNext').textContent=(这.IDX+1>=这.全部的) ? (朗==='T'?'看 结 果':'看 结 果') : (朗==='T'?'下 一 题 ▶':'下 一 题 ▶');
-    $('#gNext').onClick=()=>{ 如果(这.IDX+1>=这.全部的){ 这.完成(); } 其他 { 这.IDX++;这.renderFill(); } };
-    这.updateScore();
+    $('#gNext').disabled=true;
+    $('#gNext').textContent = (this.idx+1>=this.total) ? (LANG==='t'?'看 結 果':'看 结 果') : (LANG==='t'?'下 一 題 ▶':'下 一 题 ▶');
+    $('#gNext').onclick = ()=>{ if(this.idx+1>=this.total){ this.finish(); } else { this.idx++; this.renderFill(); } };
+    this.updateScore();
   },
   renderMeaning(){
-    这.锁定=假的;
-    Const 它=这.项目[这.IDX];
-    $('#gBody').innerHTML='<div class="G-Q no-term"style="font-size:clamp(16px，2.4vh，21px)；字母间距：.04em">${ESC(T(它.q))}</div>
-<div class="g-qs">${朗==='T'?'选一个最贴切的解释':'选一个最贴切的解释'}</div>
-<div class="g-opts"style="网格模板列：1fr">${它.opts.地图((o,我)=>'<button class="g-opt long"数据-I="${我}">${'ABC'[我]}　${ESC(T(o))}</button>').参加('')}</div>
-<div class="g-fb"id="GFB"></div>';
-    $$('#GBODY.g-opt').foreach(b=>b.addEventListener('单击', ()=>{
-      如果(这.锁定) 返回; 这.锁定=正确;
-      Const 好的=parseInt(b.数据集.我,10)===它.答;
-      b.classList.添加(好的?'右':'错误');
-      如果(!好的){ $$('#GBODY.g-opt').foreach(x=>{ 如果(parseInt(x.数据集.我,10)===它.答) x.classList.添加('右'); }); }
-      如果(好的){ 这.分数++;测验.正确的++;snd.好的(); } 其他 snd.坏的();
-      测验.全部的++;
-      $('#gFb').innerHTML=(好的?'<b>'+(朗==='T'?'答对了！':'答对了！')+'</b>':'<b>'+(朗==='T'?'再想想：':'再想想：')+'</b>')+ESC(T(它.提示));
-      $('#gNext').禁用=假的;
+    this.locked=false;
+    const it=this.items[this.idx];
+    $('#gBody').innerHTML = `<div class="g-q no-term" style="font-size:clamp(16px,2.4vh,21px);letter-spacing:.04em">${esc(T(it.q))}</div>
+      <div class="g-qs">${LANG==='t'?'選一個最貼切的解釋':'选一个最贴切的解释'}</div>
+      <div class="g-opts" style="grid-template-columns:1fr">${it.opts.map((o,i)=>`<button class="g-opt long" data-i="${i}">${'ABC'[i]}　${esc(T(o))}</button>`).join('')}</div>
+      <div class="g-fb" id="gFb"></div>`;
+    $$('#gBody .g-opt').forEach(b=> b.addEventListener('click', ()=>{
+      if(this.locked) return; this.locked=true;
+      const ok = parseInt(b.dataset.i,10)===it.ans;
+      b.classList.add(ok?'right':'wrong');
+      if(!ok){ $$('#gBody .g-opt').forEach(x=>{ if(parseInt(x.dataset.i,10)===it.ans) x.classList.add('right'); }); }
+      if(ok){ this.score++; QUIZ.right++; Snd.ok(); } else Snd.bad();
+      QUIZ.total++;
+      $('#gFb').innerHTML = (ok?'<b>'+(LANG==='t'?'答對了！':'答对了！')+'</b> ':'<b>'+(LANG==='t'?'再想想：':'再想想：')+'</b> ') + esc(T(it.tip));
+      $('#gNext').disabled=false;
     }));
-    $('#gNext').禁用=正确;
-    $('#gNext').textContent=(这.IDX+1>=这.全部的) ? (朗==='T'?'看 结 果':'看 结 果') : (朗==='T'?'下 一 题 ▶':'下 一 题 ▶');
-    $('#gNext').onClick=()=>{ 如果(这.IDX+1>=这.全部的){ 这.完成含义(); } 其他 { 这.IDX++;这.renderMeaning(); } };
-    这.updateScore();
+    $('#gNext').disabled=true;
+    $('#gNext').textContent = (this.idx+1>=this.total) ? (LANG==='t'?'看 結 果':'看 结 果') : (LANG==='t'?'下 一 題 ▶':'下 一 题 ▶');
+    $('#gNext').onclick = ()=>{ if(this.idx+1>=this.total){ this.finishMeaning(); } else { this.idx++; this.renderMeaning(); } };
+    this.updateScore();
   },
   renderMatch(){
-    Const 挑选=[...match_ITEMS].种类(()=>数学.随机()-.5).片(0,4);
-    这.左=挑选.地图((p,我)=>({k:'p'+我, 文本:p.斑块, 一对:我}));
-    这.正确的=挑选.地图((p,我)=>({k:'R'+我, 文本:p.地方, 一对:我}));
-    这.正确的.种类(()=>数学.随机()-.5);
-    这.SEL=无效的; 这.匹配=0; 这.全部的=4; 这.分数=0; 测验.全部的+=4;
-    $('#gBadge').textContent='联'; $('#gTitle').textContent=朗==='T'?'匾 额 归 位':'匾 额 归 位';
-    $('#gSub').textContent=朗==='T'?'先点匾额，再点它所在的景致。':'先点匾额，再点它所在的景致。';
-    $('#gBody').innerHTML='<div class="火柴板">
-      <div班级="m-col"><div班级="m-col-t">${朗==='T'?'额外额':'匾 额'}</div>
-        ${这.左.地图(o=>'<button class="M-Card"数据侧="l"数据-k="${o.K}"数据对="${o.一对}">${ESC(T(o.文本))}</button>').参与('')}
-</div>
-      <div班级="m-col"><div班级="m-col-t">${朗==='T'?'景 致':'景 致'}</div>
-        ${这.正确的.地图(o=>'<按钮class="M-Card"数据侧="r"数据-K="${o.k}"数据对="${o.一对}">${ESC(T(o.文本))}</button>').参与('')}
-</div></div>
-<div班级="g-fb"id="GFB">${朗==='T'?'共 4 对，全对有奖。 ':'共 4 对，全对有奖。 '}</div>';
-    $$('#GBODY.m-card').foreach(b=>b.addEventListener('单击', ()=>{
-      如果(b.classList.包含('已完成')) 返回;
-      Const 一边=b.数据集.一边;
-      如果(一边==='L'){ $$('#GBODY.m-card[data-side="l"]').foreach(x=>x.classList.移除('Sel')); b.classList.添加('Sel'); 这.SEL=b; snd.点击(); 返回; }
-      如果(!这.SEL){ $('#gFb').textContent=朗==='T'?'先选左边的匾额。':'先选左边的匾额。'; 返回; }
-      如果(这.SEL.数据集.一对===b.数据集.一对){
-        这.SEL.classList.添加('已完成'); b.classList.添加('已完成'); 这.SEL.classList.移除('Sel');
-        这.sel=null; 这.匹配++; 这.score++; QUIZ.right++; Snd.好的();
-        $('#gFb').innerHTML = '<b>'+(LANG==='t'?'对了！':'对了！')+'</b> ' + T('匾额要题得贴合眼前的景，才不算白题。');
-        if(这.匹配===4){ $('#gFb').innerHTML='<b>'+(LANG==='t'?'全 对！':'全 对！')+'</b> ' + T('四块匾都归了位——这一回的景，你记住了。'); 这.finish(); }
+    const pick = [...MATCH_ITEMS].sort(()=>Math.random()-.5).slice(0,4);
+    this.left = pick.map((p,i)=>({k:'p'+i, text:p.plaque, pair:i}));
+    this.right = pick.map((p,i)=>({k:'r'+i, text:p.place, pair:i}));
+    this.right.sort(()=>Math.random()-.5);
+    this.sel=null; this.matched=0; this.total=4; this.score=0; QUIZ.total+=4;
+    $('#gBadge').textContent='联'; $('#gTitle').textContent = LANG==='t'?'匾 額 歸 位':'匾 额 归 位';
+    $('#gSub').textContent = LANG==='t'?'先點匾額，再點它所在的景致。':'先点匾额，再点它所在的景致。';
+    $('#gBody').innerHTML = `<div class="match-board">
+      <div class="m-col"><div class="m-col-t">${LANG==='t'?'匾 額':'匾 额'}</div>
+        ${this.left.map(o=>`<button class="m-card" data-side="l" data-k="${o.k}" data-pair="${o.pair}">${esc(T(o.text))}</button>`).join('')}
+      </div>
+      <div class="m-col"><div class="m-col-t">${LANG==='t'?'景 致':'景 致'}</div>
+        ${this.right.map(o=>`<button class="m-card" data-side="r" data-k="${o.k}" data-pair="${o.pair}">${esc(T(o.text))}</button>`).join('')}
+      </div></div>
+      <div class="g-fb" id="gFb">${LANG==='t'?'共 4 對，全對有獎。':'共 4 对，全对有奖。'}</div>`;
+    $$('#gBody .m-card').forEach(b=> b.addEventListener('click', ()=>{
+      if(b.classList.contains('done')) return;
+      const side=b.dataset.side;
+      if(side==='l'){ $$('#gBody .m-card[data-side="l"]').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); this.sel=b; Snd.click(); return; }
+      if(!this.sel){ $('#gFb').textContent = LANG==='t'?'先選左邊的匾額。':'先选左边的匾额。'; return; }
+      if(this.sel.dataset.pair===b.dataset.pair){
+        this.sel.classList.add('done'); b.classList.add('done'); this.sel.classList.remove('sel');
+        this.sel=null; this.matched++; this.score++; QUIZ.right++; Snd.ok();
+        $('#gFb').innerHTML = '<b>'+(LANG==='t'?'對了！':'对了！')+'</b> ' + T('匾额要题得贴合眼前的景，才不算白题。');
+        if(this.matched===4){ $('#gFb').innerHTML='<b>'+(LANG==='t'?'全 對！':'全 对！')+'</b> ' + T('四块匾都归了位——这一回的景，你记住了。'); this.finish(); }
       } else {
-        b.classList.添加('err'); 这.sel.classList.添加('err'); Snd.bad();
-        const a=这.sel; 这.sel=null;
+        b.classList.add('err'); this.sel.classList.add('err'); Snd.bad();
+        const a=this.sel; this.sel=null;
         setTimeout(()=>{ b.classList.remove('err'); a.classList.remove('err','sel'); },380);
-        $('#gFb').textContent = LANG==='t'?'不对哦，再看看这处景的名字。':'不对哦，再看看这处景的名字。';
+        $('#gFb').textContent = LANG==='t'?'不對哦，再看看這處景的名字。':'不对哦，再看看这处景的名字。';
       }
     }));
     $('#gScore').textContent = '';
     $('#gNext').textContent = LANG==='t'?'關 閉':'关 闭';
-    $('#gNext').禁用=false;
+    $('#gNext').disabled=false;
     $('#gNext').onclick = ()=>{ $('#ovGame').classList.remove('on'); };
   },
-  updateScore(){ $('#gScore').innerHTML = (LANG==='t'?'答對 ':'答对 ') + '<b>'+这.score+'</b> / '+这.全部的; },
+  updateScore(){ $('#gScore').innerHTML = (LANG==='t'?'答對 ':'答对 ') + '<b>'+this.score+'</b> / '+this.total; },
   finish(){
-    这.锁定=true;
-    $('#gFb').innerHTML = '<b>'+(LANG==='t'?'小 考 结 束':'小 考 结 束')+'</b>　' + (这.score===这.全部的 ? T('全对！匾额都归了位。再考一考词义？') : T(错了几处，回去把词义再抄一遍。'));
-    if(这.score===这.全部的){
-      $('#gNext').textContent = LANG==='t'?'再 考 词 义 ▶':'再 考 词 义 ▶';
-      $('#gNext').onclick = ()=>{ $('#ovGame').classList.remove('on'); setTimeout(()=>游戏.open('meaning'), 200); };
+    this.locked=true;
+    $('#gFb').innerHTML = '<b>'+(LANG==='t'?'小 考 結 束':'小 考 结 束')+'</b>　' + (this.score===this.total ? T('全对！匾额都归了位。再考一考词义？') : T('错了几处，回去把词义再抄一遍。'));
+    if(this.score===this.total){
+      $('#gNext').textContent = LANG==='t'?'再 考 詞 義 ▶':'再 考 词 义 ▶';
+      $('#gNext').onclick = ()=>{ $('#ovGame').classList.remove('on'); setTimeout(()=>Game.open('meaning'), 200); };
     } else {
       $('#gNext').textContent = LANG==='t'?'收 起 卷 子':'收 起 卷 子';
       $('#gNext').onclick = ()=>{ $('#ovGame').classList.remove('on'); };
     }
   },
-  完成含义(){完成含义(){
-这()；()；.锁定=正确；这.锁定=正确;
-$('#GFB').innerHTML='<b>'+(朗==='T'？《词义考完》：'词义考完')+'</b>'+(这.分数===这.全部的？T('全对！这些词，你是真懂了。')：T('错了几处，回去把词条再点开看看。 $('#GFB').innerHTML='<b>'+(LANG==='t'？《词义考完》:'词 义 考 完')+'</b>'+(这.分数===这.全部的 ? T('全对！这些词，你是真懂了。') : T('错了几处，回去把词条再点开看看。 '));
-    $('#gNext').textContent=朗==='T'?'收 起 卷 子':'收 起 卷 子';
-    $('#gNext').onClick=()=>{ $('#ovGame').classList.移除('开'); };
+  finishMeaning(){
+    this.locked=true;
+    $('#gFb').innerHTML = '<b>'+(LANG==='t'?'詞 義 考 完':'词 义 考 完')+'</b>　' + (this.score===this.total ? T('全对！这些词，你是真懂了。') : T('错了几处，回去把词条再点开看看。'));
+    $('#gNext').textContent = LANG==='t'?'收 起 卷 子':'收 起 卷 子';
+    $('#gNext').onclick = ()=>{ $('#ovGame').classList.remove('on'); };
   }
 };
 
-$('#btnAudio').addEventListener('单击'<(
-snd.在……之上=！snd.开；AMB.在……之上=snd.开；AMB.applyVolume()；Snd.在……之上= !snd.在……之上; AMB.在……之上=snd.在……之上; AMB.applyVolume();
-如果(snd.在……之上){snd.init()；Amb.确保()；常量k=AMB.键；AMB.钥匙="；if(k)Amb.start(k)；}if(Snd.on){Snd.init()；Amb.确保()；常数K=Amb.key；Amb.钥匙="；如果(k)AMB.开始(k)；}
-$('#btnAudio').classList.切换('开'，Snd.在……之上)；$('#btnAudio').classList.切换('开', snd.在……之上);
-$('#btnAudio').textContent=snd.On？(朗==='T'？'♪ 音色'：'♪声音')：(朗==='T'？'♪静音'：'♪静音')；$('#btnAudio').textContent=snd.在……之上？(朗==='T'?'♪声音':'♪声音') : (朗==='T'?'♪静音':'♪静音');
-如果(snd.在……之上)snd.好的()；如果(snd.在……之上) snd.好的();
+$('#btnAudio').addEventListener('click', ()=>{
+  Snd.on = !Snd.on; Amb.on = Snd.on; Amb.applyVolume();
+  if(Snd.on){ Snd.init(); Amb.ensure(); const k = Amb.key; Amb.key=''; if(k) Amb.start(k); }
+  $('#btnAudio').classList.toggle('on', Snd.on);
+  $('#btnAudio').textContent = Snd.on ? (LANG==='t'?'♪ 聲音':'♪ 声音') : (LANG==='t'?'♪ 靜音':'♪ 静音');
+  if(Snd.on) Snd.ok();
 });
 
-窗户.addEventListener('按下键'，e=>{.addEventListener('按下键', e=>{
-如果(e.钥匙===”||e.钥匙==='输入'){如果(e.钥匙===' '||e.钥匙==='输入'){
-如果($('#overEnd').classList.包含('开'))返回；如果($('#overEnd').classList.包含('开')) 返回;
-如果($('#ovGame').classList.包含('开')){如果(e.目标&&e.目标.标记名==='输入')return；return；}如果($('#ovGame').classList.包含('开')){ 如果(e.目标 && e.目标.标记名==='输入') 返回; 返回; }
-如果($('#ovLesson').classList.包含('开')){e.preventDefault()；$('#lsBtn').点击()；return；}如果($('#ovLesson').classList.包含('开')){ e.preventDefault(); $('#lsBtn').点击(); 返回; }
-如果(scrRpg.classList.包含('开')){e.preventDefault()；提前()；return；}如果(scrRpg.classList.包含('开')){ e.preventDefault(); 预先的(); 返回; }
-如果(scrTitle.classList.包含('开')){e.preventDefault()；$('#startBtn').点击()；return；}如果(scrTitle.classList.包含('开')){ e.preventDefault(); $('#startBtn').点击(); 返回; }
-如果(scrPro.classList.包含('开')){e.preventDefault()；$('#proBtn').点击()；return；}如果(scrPro.classList.包含('开')){ e.preventDefault(); $('#proBtn').点击(); 返回; }
+window.addEventListener('keydown', e=>{
+  if(e.key===' '||e.key==='Enter'){
+    if($('#ovEnd').classList.contains('on')) return;
+    if($('#ovGame').classList.contains('on')){ if(e.target && e.target.tagName==='INPUT') return; return; }
+    if($('#ovLesson').classList.contains('on')){ e.preventDefault(); $('#lsBtn').click(); return; }
+    if(scrRpg.classList.contains('on')){ e.preventDefault(); advance(); return; }
+    if(scrTitle.classList.contains('on')){ e.preventDefault(); $('#startBtn').click(); return; }
+    if(scrPro.classList.contains('on')){ e.preventDefault(); $('#proBtn').click(); return; }
   }
-如果(scrMap.classList.包含('开')){如果(scrMap.classList.包含('开')){
-如果(e.钥匙==='箭头右')setStation(数学.最小值(米.IDX+1，maxUnlocked()))；如果(e.钥匙==='箭头右') setStation(数学.最小值(米.IDX+1,maxUnlocked()));
-如果(e.钥匙==='左箭头')setStation(数学.最大值(米.IDX-1，0))；如果(e.钥匙==='左箭头') setStation(数学.最大值(米.IDX-1,0));
+  if(scrMap.classList.contains('on')){
+    if(e.key==='ArrowRight') setStation(Math.min(M.idx+1,maxUnlocked()));
+    if(e.key==='ArrowLeft') setStation(Math.max(M.idx-1,0));
   }
-如果(scrRpg.classList.包含('开')&&RP.choiceOpen){如果(scrRpg.classList.包含('开') && RP.choiceOpen){
-Constn=parseInt(e.key，10)；常数n=parseInt(e.钥匙,10);
-如果(n>=1&&n<=4){ Constb=rpgChoices.儿童[n-1]；如果(b)b.点击()；}如果(n>=1&&n<=4){ Constb=rpgChoices.儿童[n-1]; 如果(b) b.点击(); }
+  if(scrRpg.classList.contains('on') && RP.choiceOpen){
+    const n=parseInt(e.key,10);
+    if(n>=1&&n<=4){ const b=rpgChoices.children[n-1]; if(b) b.click(); }
   }
 });
 
-=========================================================*/
-/*=========================================================
-=========================================================*/
-窗口。__更改日志=[.__CHANGELOG=[
-{id：'2026-10-22-a'，区域：'标题"，消息："开发动画：夜→晨(天空/朝阳/远山/亭子/花瓣)'}，{id：'2026-10-22-a'， {id：'2026-10-22-a'， {id：'2026-10-22-a'，区域{id：'2026-10-22-a'，：'标题"，消息："开发动画：夜→晨(天空/朝阳/远山/亭子/花瓣)'}，
-{id:'2026-10-22-b',区域：'序言'，消息：'序言：一页→两页(叙事/玩法）'}，{id:'2026-10-22-b',区域：'序言'，消息：'序言：一页→两页(叙事/玩法)'}，
-{id:'2026-10-22-c',区域：'选项"，消息："选项内移除词条链接，避免提前露答案'}，{id:'2026-10-22-c',区域：'选项"，消息："选项内移除词条链接，避免提前露答案'}，
-{id：'2026-10-22-d'，区域：'words'，msg：'单词+必知合并；加搜索，分类折叠'}，{id：'2026-10-22-d'，区域：'words'，msg：'单词+必知合并；加搜索，分类折叠'}，
-{id:'2026-10-22-e',区域：'dev'，消息：'后台回溯：changelog+@chg 标记+控制台表'}，{id:'2026-10-22-e',区域：'dev'，消息：'后台回溯：changelog+@chg 标记+控制台表'}，
-{id:'2026-10-22-f',区域：'i18n'，消息：'简繁切换：内置字表+词组优先+只翻文本节点+动态重绘'}，{id:'2026-10-22-f',区域：'i18n'，消息：'简繁切换：内置字表+词组优先+只翻文本节点+动态重绘'}，
-{id:'2026-10-22-g',区域：'选项"，消息："选项：乱序一次缓存，切换语言不重洗'}{id:'2026-10-22-g',区域：'选项"，消息："选项：乱序一次缓存，切换语言不重洗'}
+/* =========================================================
+   后台回溯：结构化变更表
+   ========================================================= */
+window.__CHANGELOG = [
+  {id:'2026-10-22-a', area:'title',    msg:'开篇动画：夜 → 晨（天空/朝阳/远山/亭子/花瓣）'},
+  {id:'2026-10-22-b', area:'prologue', msg:'序言：一页 → 两页（叙事 / 玩法）'},
+  {id:'2026-10-22-c', area:'choice',   msg:'选项内移除词条链接，避免提前露答案'},
+  {id:'2026-10-22-d', area:'words',    msg:'字词 + 必知合并；加搜索、分类折叠'},
+  {id:'2026-10-22-e', area:'dev',      msg:'后台回溯：CHANGELOG + @chg 标记 + 控制台表'},
+  {id:'2026-10-22-f', area:'i18n',     msg:'简繁切换：内置字表 + 词组优先 + 只翻文本节点 + 动态重绘'},
+  {id:'2026-10-22-g', area:'choice',   msg:'选项：乱序一次缓存，切换语言不重洗'}
 ];
-文件。addEventListener('keydown'，e=>{.addEventListener('keydown'，e=>{
-  if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='l'){if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='l'){
-if(console.table)console.table(窗口__更改日志)；if(控制台。桌子)控制台。表格(窗口__更改日志)；
-else console.log(窗口.__changelog)；else console.log(窗口.__changelog)；
+document.addEventListener('keydown', e=>{
+  if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='l'){
+    if(console.table) console.table(window.__CHANGELOG);
+    else console.log(window.__CHANGELOG);
   }
 });
 
-</html>html>
-applyStaticLang()；()；
-startTitle()；()；
-if(！Snd.on)$('#btnAudio').click()；(！Snd.on)$('#btnAudio').click()；
+applyStaticLang();
+refreshDynamicLang();
+startTitle();
+if(!Snd.on) $('#btnAudio').click();
 
-窗口。__game={.__game={
-章节：(id)=>{closeEnding()；enterChapter(id)；}，章节：(id)=>{closeEnding()；enterChapter(id)；}，
-课程：(id)=>openLesson(id)，lesse：(id)=>openLesson(id)，
-结束：(r)=>完成章节(r)，ending：(r)=>finishChapter(r)，
-map：()=>{closeEnding()；startmap()；}，map：()=>{closeEnding()；startmap()；}，
-intro：()=>{closeEnding()；openIntrro()；}，intro：()=>{closeEnding()；openIntrro()；}，
-game：(m)=>Game.open(m)，game：(m)=>Game.open(m)，
-words：()=>OpenWords()，words：()=>OpenWords()，
-更改日志：()=>窗口。__更改日志，更改日志：()=>窗口。__changelog，
-状态：()=>({id:RP.id，pc:RP.pc，完成：[...PROG.done]，lang:lang})，状态：()=>({id:RP.id，pc:RP.pc，完成：[...PROG.done]，lang:lang})，
-S2T：(str)=>S2T(str)/*调试用：在控制台测试简繁转换*/S2T：(str)=>S2T(str)/*调试用：在控制台测试简繁转换*/
+window.__game = {
+  chapter:(id)=>{ closeEnding(); enterChapter(id); },
+  lesson:(id)=> openLesson(id),
+  ending:(r)=> finishChapter(r),
+  map:()=>{ closeEnding(); startMap(); },
+  intro:()=>{ closeEnding(); openIntro(); },
+  game:(m)=> Game.open(m),
+  words:()=> openWords(),
+  changelog:()=> window.__CHANGELOG,
+  state:()=> ({id:RP.id, pc:RP.pc, done:[...PROG.done], lang:LANG}),
+  s2t:(str)=> s2t(str)   /* 调试用：在控制台测试简繁转换 */
 };
-</script>剧本>
-</body>正文>
-</html>html>
+</script>
+</body>
+</html>
